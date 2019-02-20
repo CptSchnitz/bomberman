@@ -13,14 +13,16 @@ namespace bomberman
         private int ticksToExplode;
         private bool isArmed;
         private Player owner;
+        private bool exploded;
 
         public Bomb(Image image, Player bombOwner) : base(image)
         {
             _image.Source = new BitmapImage(new Uri("ms-appx:///Assets/bomb.png"));
             _image.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
             isArmed = false;
-            ticksToExplode = 10;
+            ticksToExplode = 20;
             owner = bombOwner;
+            exploded = false;
         }
 
         public int Strength
@@ -31,19 +33,18 @@ namespace bomberman
             }
         }
 
+        public bool IsArmed { get { return isArmed; } }
 
         public bool Tick(Board board)
         {
-            bool exploded = false;
-            if (!isArmed)
+            if (!IsArmed)
             {
                 if (!board.IsPlayerInTile(owner, this))
                     ArmBomb();
             }
             else if (ticksToExplode == 0)
             {
-                exploded = true;
-                owner.GiveBomb();
+                exploded = true;                
                 _image.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
             }
             else
@@ -55,15 +56,28 @@ namespace bomberman
         }
 
 
+        public bool Exploded
+        {
+            get { return exploded; }
+        }
+
+
         public void ArmBomb()
         {
             isArmed = true;
             _image.Visibility = Windows.UI.Xaml.Visibility.Visible;
         }
 
+        public void Explode()
+        {
+            ticksToExplode = 0;
+            owner.GiveBomb();
+            exploded = true;
+        }
+
         public override bool IsPassable()
         {
-            return !isArmed || ticksToExplode == 0;
+            return !IsArmed || ticksToExplode == 0;
         }
 
     }

@@ -43,8 +43,13 @@ namespace bomberman
         {
             for (int i = bombsList.Count - 1; i >= 0; i--)
             {
-                if (bombsList[i].Tick(board))
+                if (bombsList[i].Exploded)
                     bombsList.RemoveAt(i);
+                else if (bombsList[i].Tick(board))
+                {
+                    List<XYCoordinates> explosionCoordinates = board.ExplodeBomb(bombsList[i]);
+                    new Explosion(explosionCoordinates, canvas);
+                }
             }
         }
 

@@ -25,7 +25,13 @@ namespace bomberman
             }
         }
 
-
+        public virtual bool IsDestructable
+        {
+            get
+            {
+                return false;
+            }
+        }
 
         public virtual bool IsPassable()
         {

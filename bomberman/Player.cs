@@ -30,11 +30,11 @@ namespace bomberman
         protected Player(int x, int y, Image image, string imageSource)
         {
             centerCoordinate = new XYCoordinates(x, y);
-            MoveSpeed = 50;
+            MoveSpeed = 25;
             _image = image;
             _image.Source = new BitmapImage(new Uri($"ms-appx:///{imageSource}"));
-            currentBombCount = maxBombCount = 1;
-            BombStr = 1;
+            currentBombCount = maxBombCount = 2;
+            _bombStr = 2;
         }
 
         public XYCoordinates GetCenter ()
