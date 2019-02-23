@@ -10,17 +10,20 @@ namespace bomberman
 {
     class Board
     {
-        private Tile[,] board;
-
+        private Tile[,] _board;
+        Random _random;
         public XYCoordinates MaxCoordinates { get; }
+
         public Board(Canvas canvas)
         {
+            _random = new Random();
+            // fix next two lines (use fields mb)
+            _board = new Tile[15, 17];
+            MaxCoordinates = new XYCoordinates(_board.GetLength(1) * 50, _board.GetLength(0) * 50);
 
-            board = new Tile[15, 17];
-            MaxCoordinates = new XYCoordinates(board.GetLength(1) * 50, board.GetLength(0) * 50);
-            for (int i = 0; i < board.GetLength(0); i++)
+            for (int i = 0; i < _board.GetLength(0); i++)
             {
-                for (int j = 0; j < board.GetLength(1); j++)
+                for (int j = 0; j < _board.GetLength(1); j++)
                 {
                     Image image = new Image
                     {
@@ -40,159 +43,194 @@ namespace bomberman
                     {
                         tile = new Wall(image);
                     }
-                    else if (((i == 0 || i == board.GetLength(0) - 1) && (j < 2 || j >= board.GetLength(1) - 2)) ||
-                        ((i == 1 || i == board.GetLength(0) - 2) && (j == 0 || j == board.GetLength(1) - 1)))
+                    else if (((i == 0 || i == _board.GetLength(0) - 1) && (j < 2 || j >= _board.GetLength(1) - 2)) ||
+                        ((i == 1 || i == _board.GetLength(0) - 2) && (j == 0 || j == _board.GetLength(1) - 1)))
                     {
                         tile = new Tile(image);
                     }
 
-                    board[i, j] = tile;
+                    _board[i, j] = tile;
                 }
             }
         }
 
-        public Tile[,] GetBoard()
+        public XYCoordinates[] SpawnLocation
         {
-            return board;
+            get
+            {
+                XYCoordinates[] locations =
+                    {
+                    new XYCoordinates(25, 25),
+                    new XYCoordinates(25,725),
+                    new XYCoordinates(825,25),
+                    new XYCoordinates(825,725),
+                };
+                return locations;
+            }
         }
 
         public bool PlaceBomb(Player bombOwner, int bombStr, out Bomb bomb)
         {
             bomb = null;
-            int column = bombOwner.GetCenter().X / 50;
-            int row = bombOwner.GetCenter().Y / 50;
-            if (!(board[row, column] is Bomb))
+            int column = (int)bombOwner.GetCenter().X / 50;
+            int row = (int)bombOwner.GetCenter().Y / 50;
+            if (!(_board[row, column] is Bomb))
             {
-                board[row, column] = bomb = new Bomb(board[row, column].GetImage, bombOwner);
+                _board[row, column] = bomb = new Bomb(_board[row, column].Image, bombOwner, this);
                 return true;
             }
             return false;
         }
 
-        public bool IsMovePossible(XYCoordinates CenterCoordinates)
+        public void OnPlayerMovement(object sender, EventArgs e)
+        {
+            Player player = sender as Player;
+            List<Tile> corners = GetUniqueCornerTilesFromCoordinates(player.GetCenter());
+            foreach (Tile cornerTile in corners)
+                if (cornerTile is PowerUp powerUp)
+                {
+                    powerUp.PickPowerUp(player);
+                    TryGettingTileLocation(powerUp, out int row, out int column);
+                    _board[row, column] = new Tile(powerUp.Image);
+                }
+        }
+
+        public bool IsMovePossible(XYCoordinates CenterCoordinates, Player player)
         {
             // out of bounds check
             if (CenterCoordinates.Y - 25 < 0 || CenterCoordinates.X - 25 < 0 || CenterCoordinates.Y + 25 > MaxCoordinates.Y || CenterCoordinates.X + 25 > MaxCoordinates.X)
                 return false;
 
-            (Tile TopLeftTile, Tile BotLeftTile, Tile TopRightTile, Tile BotRightTile) = GetTilesInCoordinatesCorner(CenterCoordinates);
-            return TopLeftTile.IsPassable() && BotLeftTile.IsPassable() && TopRightTile.IsPassable() && BotRightTile.IsPassable();
+            List<Tile> corners = GetUniqueCornerTilesFromCoordinates(CenterCoordinates);
+            foreach (Tile cornerTile in corners)
+                if (!cornerTile.IsPassable(player))
+                    return false;
+            return true;
         }
 
         public bool IsPlayerInTile(Player player, Tile tile)
         {
-            var (TopLeftTile, BotLeftTile, TopRightTile, BotRightTile) = GetTilesInCoordinatesCorner(player.GetCenter());
-            return ReferenceEquals(TopLeftTile, tile) || ReferenceEquals(BotLeftTile, tile) || ReferenceEquals(TopRightTile, tile) || ReferenceEquals(BotRightTile, tile);
+            List<Tile> corners = GetUniqueCornerTilesFromCoordinates(player.GetCenter());
+            foreach (Tile cornerTile in corners)
+                if (ReferenceEquals(cornerTile, tile))
+                    return true;
+            return false;
         }
 
-        public List<XYCoordinates> ExplodeBomb(Bomb bomb)
+        public List<Tile> GetUniqueCornerTilesFromCoordinates(XYCoordinates Coordinates)
         {
-            int row = 0;
-            int column = 0;
+            List<Tile> corners = new List<Tile>();
+            Tile tile = _board[((int)Coordinates.Y - 24) / 50, ((int)Coordinates.X - 24) / 50];
+            corners.Add(tile);
 
-            for (int i = 0; i < board.GetLength(0); i++)
+            tile = _board[((int)Coordinates.Y + 24) / 50, ((int)Coordinates.X - 24) / 50];
+            if (!corners.Contains(tile))
+                corners.Add(tile);
+
+            tile = _board[((int)Coordinates.Y - 24) / 50, ((int)Coordinates.X + 24) / 50];
+            if (!corners.Contains(tile))
+                corners.Add(tile);
+
+            tile = _board[((int)Coordinates.Y + 24) / 50, ((int)Coordinates.X + 24) / 50];
+            if (!corners.Contains(tile))
+                corners.Add(tile);
+
+            return corners;
+        }
+
+        public bool TryGettingTileLocation(Tile tile, out int row, out int column)
+        {
+            row = 0;
+            column = 0;
+
+            for (int i = 0; i < _board.GetLength(0); i++)
             {
-                for (int j = 0; j < board.GetLength(1); j++)
+                for (int j = 0; j < _board.GetLength(1); j++)
                 {
-                    if (ReferenceEquals(board[i, j], bomb))
+                    if (ReferenceEquals(_board[i, j], tile))
                     {
                         row = i;
                         column = j;
-
+                        return true;
                     }
                 }
             }
+            return false;
+        }
+
+        public List<Tile> ExplodeBomb(Bomb bomb)
+        {
+            TryGettingTileLocation(bomb, out int row, out int column);
             return ExplodeBomb(bomb, row, column);
 
         }
-        private List<XYCoordinates> ExplodeBomb(Bomb bomb, int row, int column, Direction dir = Direction.Null)
+        private List<Tile> ExplodeBomb(Bomb bomb, int row, int column, Direction lastBombRelativeDirection = Direction.Null)
         {
-            List<XYCoordinates> BombAOE = new List<XYCoordinates>();
-            board[row, column] = new Tile(bomb.GetImage);
-            BombAOE.Add(new XYCoordinates(column * 50, row * 50));
+            List<Tile> BombAOE = new List<Tile>();
+            Tile tile = new Tile(bomb.Image);
+            _board[row, column] = tile;
+            BombAOE.Add(tile);
             bomb.Explode();
-            if (dir != Direction.Up)
+            if (lastBombRelativeDirection != Direction.Up)
                 BombAOE.AddRange(ExplodeUp(row - 1, column, bomb.Strength));
-            if (dir != Direction.Down)
+            if (lastBombRelativeDirection != Direction.Down)
                 BombAOE.AddRange(ExplodeDown(row + 1, column, bomb.Strength));
-            if (dir != Direction.Left)
+            if (lastBombRelativeDirection != Direction.Left)
                 BombAOE.AddRange(ExplodeLeft(row, column - 1, bomb.Strength));
-            if (dir != Direction.Right)
+            if (lastBombRelativeDirection != Direction.Right)
                 BombAOE.AddRange(ExplodeRight(row, column + 1, bomb.Strength));
             return BombAOE;
 
         }
 
-        private List<XYCoordinates> ExplodeUp(int row, int column, int bombStr)
+        private List<Tile> ExplodeUp(int row, int column, int bombStr)
         {
-            List<XYCoordinates> BombAOE = new List<XYCoordinates>();
-            while (row >= 0 && !board[row, column].BlocksExplosion && bombStr > 0)
+            List<Tile> BombAOE = new List<Tile>();
+            while (row >= 0 && !_board[row, column].IsBlocksExplosion() && bombStr > 0)
             {
-                if (board[row, column] is Bomb bomb && bomb.IsArmed)
+                if (HandleSpecialTileCasesInExplosion(row, column, BombAOE, Direction.Down))
                 {
-                    BombAOE.AddRange(ExplodeBomb(bomb, row, column, Direction.Down));
-                    return BombAOE;
-                }
-                else if (board[row, column].IsDestructable)
-                {
-                    board[row, column] = new Tile(board[row, column].GetImage);
-                    BombAOE.Add(new XYCoordinates(column * 50, row * 50));
                     return BombAOE;
                 }
                 else
                 {
-                    BombAOE.Add(new XYCoordinates(column * 50, row * 50));
+                    BombAOE.Add(_board[row,column]);
                     row--;
                     bombStr--;
                 }
             }
             return BombAOE;
         }
-        private List<XYCoordinates> ExplodeDown(int row, int column, int bombStr)
+        private List<Tile> ExplodeDown(int row, int column, int bombStr)
         {
-            List<XYCoordinates> BombAOE = new List<XYCoordinates>();
-            while (row < board.GetLength(0) && !board[row, column].BlocksExplosion && bombStr > 0)
+            List<Tile> BombAOE = new List<Tile>();
+            while (row < _board.GetLength(0) && !_board[row, column].IsBlocksExplosion() && bombStr > 0)
             {
-                if (board[row, column] is Bomb bomb && bomb.IsArmed)
+                if (HandleSpecialTileCasesInExplosion(row, column, BombAOE, Direction.Up))
                 {
-                    BombAOE.AddRange(ExplodeBomb(bomb, row, column, Direction.Up));
-                    return BombAOE;
-                }
-                else if (board[row, column].IsDestructable)
-                {
-                    board[row, column] = new Tile(board[row, column].GetImage);
-                    BombAOE.Add(new XYCoordinates(column * 50, row * 50));
                     return BombAOE;
                 }
                 else
                 {
-                    BombAOE.Add(new XYCoordinates(column * 50, row * 50));
+                    BombAOE.Add(_board[row, column]);
                     row++;
                     bombStr--;
                 }
             }
             return BombAOE;
         }
-        private List<XYCoordinates> ExplodeLeft(int row, int column, int bombStr)
+        private List<Tile> ExplodeLeft(int row, int column, int bombStr)
         {
-            List<XYCoordinates> BombAOE = new List<XYCoordinates>();
-            while (column >= 0 && !board[row, column].BlocksExplosion && bombStr > 0)
+            List<Tile> BombAOE = new List<Tile>();
+            while (column >= 0 && !_board[row, column].IsBlocksExplosion() && bombStr > 0)
             {
-                //Replace with method later
-                if (board[row, column] is Bomb bomb && bomb.IsArmed)
+                if (HandleSpecialTileCasesInExplosion(row, column, BombAOE, Direction.Right))
                 {
-                    BombAOE.AddRange(ExplodeBomb(bomb, row, column, Direction.Right));
-                    return BombAOE;
-                }
-                else if (board[row, column].IsDestructable)
-                {
-                    board[row, column] = new Tile(board[row, column].GetImage);
-                    BombAOE.Add(new XYCoordinates(column * 50, row * 50));
                     return BombAOE;
                 }
                 else
                 {
-                    BombAOE.Add(new XYCoordinates(column * 50, row * 50));
+                    BombAOE.Add(_board[row, column]);
                     column--;
                     bombStr--;
                 }
@@ -200,26 +238,18 @@ namespace bomberman
             return BombAOE;
 
         }
-        private List<XYCoordinates> ExplodeRight(int row, int column, int bombStr)
+        private List<Tile> ExplodeRight(int row, int column, int bombStr)
         {
-            List<XYCoordinates> BombAOE = new List<XYCoordinates>();
-            while (column < board.GetLength(1) && !board[row, column].BlocksExplosion && bombStr > 0)
+            List<Tile> BombAOE = new List<Tile>();
+            while (column < _board.GetLength(1) && !_board[row, column].IsBlocksExplosion() && bombStr > 0)
             {
-                //Replace with method later
-                if (board[row, column] is Bomb bomb && bomb.IsArmed)
+                if (HandleSpecialTileCasesInExplosion(row, column, BombAOE, Direction.Left))
                 {
-                    BombAOE.AddRange(ExplodeBomb(bomb, row, column, Direction.Left));
-                    return BombAOE;
-                }
-                else if (board[row, column].IsDestructable)
-                {
-                    board[row, column] = new Tile(board[row, column].GetImage);
-                    BombAOE.Add(new XYCoordinates(column * 50, row * 50));
                     return BombAOE;
                 }
                 else
                 {
-                    BombAOE.Add(new XYCoordinates(column * 50, row * 50));
+                    BombAOE.Add(_board[row, column]);
                     column++;
                     bombStr--;
                 }
@@ -227,13 +257,40 @@ namespace bomberman
             return BombAOE;
         }
 
-        public (Tile TopLeftTile, Tile BotLeftTile, Tile TopRightTile, Tile BotRightTile) GetTilesInCoordinatesCorner(XYCoordinates Coordinates)
+        private bool HandleSpecialTileCasesInExplosion(int row, int column, List<Tile> BombAOE, Direction bombRelativeDirection)
         {
-            Tile TopLeftTile = board[(Coordinates.Y - 24) / 50, (Coordinates.X - 24) / 50];
-            Tile BotLeftTile = board[(Coordinates.Y + 24) / 50, (Coordinates.X - 24) / 50];
-            Tile TopRightTile = board[(Coordinates.Y - 24) / 50, (Coordinates.X + 24) / 50];
-            Tile BotRightTile = board[(Coordinates.Y + 24) / 50, (Coordinates.X + 24) / 50];
-            return (TopLeftTile, BotLeftTile, TopRightTile, BotRightTile);
+            if (_board[row, column] is Bomb bomb)
+            {
+                BombAOE.AddRange(ExplodeBomb(bomb, row, column, bombRelativeDirection));
+                return true;
+            }
+
+            Tile tile = new Tile(_board[row, column].Image);
+            bool flag = false;
+            if (_board[row, column] is Crate crate)
+            {                
+                switch (_random.Next() % 9)
+                {
+                    case 0:
+                        tile = new SpeedPowerUp(_board[row, column].Image);
+                        break;
+                    case 1:
+                        tile = new BombCountPowerUp(_board[row, column].Image);
+                        break;
+                    case 2:
+                        tile = new BombStrPowerUp(_board[row, column].Image);
+                        break;
+                }
+                flag =  true;
+            }
+            else if (_board[row, column].IsDestructable())
+            {
+                flag = false;
+            }
+            BombAOE.Add(tile);
+            _board[row, column] = tile;
+            return flag;
         }
+
     }
 }

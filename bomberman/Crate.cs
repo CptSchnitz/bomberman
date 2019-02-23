@@ -4,25 +4,21 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Windows.UI.Xaml.Controls;
-using Windows.UI.Xaml.Media.Imaging;
 
 namespace bomberman
 {
     class Crate : Tile
     {
-        public Crate (Image image) : base (image)
+        public Crate (Image image) : base (image, "Assets/crate.png")
         {
-            _image.Source = new BitmapImage(new Uri("ms-appx:///Assets/crate.png"));
+
         }
 
-        public override bool IsDestructable
+        public override bool IsDestructable()
         {
-            get
-            {
-                return true;
-            }
+            return true;
         }
-        public override bool IsPassable()
+        public override bool IsPassable(Player player)
         {
             return false;
         }

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Windows.UI.Xaml.Controls;
+using Windows.UI.Xaml.Media.Imaging;
 
 namespace bomberman
 {
@@ -17,7 +18,12 @@ namespace bomberman
             _image.Source = null;
         }
 
-        public Image GetImage
+        protected Tile (Image image, string ImageSource) : this (image)
+        {
+            _image.Source = _image.Source = new BitmapImage(new Uri($"ms-appx:///{ImageSource}"));
+        }
+
+        public Image Image
         {
             get
             {
@@ -25,25 +31,19 @@ namespace bomberman
             }
         }
 
-        public virtual bool IsDestructable
+        public virtual bool IsDestructable()
         {
-            get
-            {
-                return false;
-            }
+            return false;
         }
 
-        public virtual bool IsPassable()
+        public virtual bool IsPassable(Player player)
         {
             return true;
         }
 
-        public virtual bool BlocksExplosion
+        public virtual bool IsBlocksExplosion()
         {
-            get
-            {
-                return false;
-            }
+            return false;
         }
 
 

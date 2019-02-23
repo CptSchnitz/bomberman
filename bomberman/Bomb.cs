@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Media.Imaging;
 
@@ -10,75 +11,83 @@ namespace bomberman
 {
     class Bomb : Tile
     {
-        private int ticksToExplode;
-        private bool isArmed;
-        private Player owner;
-        private bool exploded;
+        private int _ticksToExplode = 12;
+        private Player _owner;
+        private DispatcherTimer _bombTimer;
+        private static readonly string _explodingBombSource = "Assets/ExplodingBomb.png";
+        private static readonly string _largeBombSource = "Assets/LargeBomb.png";
+        private static readonly string _smallBombSource = "Assets/SmallBomb.png";
+        private bool _ownerLeftBombTile;
+        private Board _board;
 
-        public Bomb(Image image, Player bombOwner) : base(image)
+        public Bomb(Image image, Player bombOwner, Board board) : base(image, _largeBombSource)
         {
-            _image.Source = new BitmapImage(new Uri("ms-appx:///Assets/bomb.png"));
-            _image.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
-            isArmed = false;
-            ticksToExplode = 20;
-            owner = bombOwner;
-            exploded = false;
+            _ownerLeftBombTile = false;
+            _owner = bombOwner;
+            _board = board;
+            _owner.PlayerMovement += _owner_PlayerMovement;
+            _bombTimer = new DispatcherTimer();
+            _bombTimer.Interval = new TimeSpan(0, 0, 0, 0, 250);
+            _bombTimer.Tick += _bombTimer_Tick;
+            _bombTimer.Start();
         }
 
         public int Strength
         {
             get
             {
-                return owner.BombStr;
+                return _owner.BombStr;
             }
         }
 
-        public bool IsArmed { get { return isArmed; } }
-
-        public bool Tick(Board board)
+        private void _owner_PlayerMovement(object sender, EventArgs e)
         {
-            if (!IsArmed)
+            if (!_board.IsPlayerInTile(_owner, this))
             {
-                if (!board.IsPlayerInTile(owner, this))
-                    ArmBomb();
+                _ownerLeftBombTile = true;
+                _owner.PlayerMovement -= _owner_PlayerMovement;
             }
-            else if (ticksToExplode == 0)
-            {
-                exploded = true;                
-                _image.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
-            }
-            else
-            {
-                ticksToExplode--;
-            }
-            return exploded;
-
         }
 
 
-        public bool Exploded
+        public void _bombTimer_Tick(object sender, object e)
         {
-            get { return exploded; }
-        }
+            switch (_ticksToExplode)
+            {
+                case 0:
+                    OnBombExplosion();
+                    return;
+                case 1:
+                    _image.Source = new BitmapImage(new Uri($"ms-appx:///{_explodingBombSource}"));
+                    break;
+                case int num when _ticksToExplode % 2 == 0:
+                    _image.Source = new BitmapImage(new Uri($"ms-appx:///{_largeBombSource}"));
+                    break;
 
-
-        public void ArmBomb()
-        {
-            isArmed = true;
-            _image.Visibility = Windows.UI.Xaml.Visibility.Visible;
+                case int num when _ticksToExplode % 2 == 1:
+                    _image.Source = new BitmapImage(new Uri($"ms-appx:///{_smallBombSource}"));
+                    break;
+            }
+            _ticksToExplode--;
         }
 
         public void Explode()
         {
-            ticksToExplode = 0;
-            owner.GiveBomb();
-            exploded = true;
+            _bombTimer.Stop();
+            _owner.GiveBomb();
         }
 
-        public override bool IsPassable()
+        public override bool IsPassable(Player player)
         {
-            return !IsArmed || ticksToExplode == 0;
+            return ReferenceEquals(_owner, player) && !_ownerLeftBombTile;
         }
 
+        protected virtual void OnBombExplosion()
+        {
+            if (BombExplosion != null)
+                BombExplosion(this, EventArgs.Empty);
+        }
+
+        public event EventHandler BombExplosion;
     }
 }

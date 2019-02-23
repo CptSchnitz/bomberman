@@ -116,21 +116,40 @@
     <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="AboutPage.xaml.cs">
+      <DependentUpon>AboutPage.xaml</DependentUpon>
+    </Compile>
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
     <Compile Include="Board.cs" />
     <Compile Include="Bomb.cs" />
+    <Compile Include="BombCountPowerUp.cs" />
+    <Compile Include="BombStrPowerUp.cs" />
     <Compile Include="Crate.cs" />
     <Compile Include="Direction.cs" />
     <Compile Include="Explosion.cs" />
+    <Compile Include="Game.cs" />
+    <Compile Include="GamePage.xaml.cs">
+      <DependentUpon>GamePage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="HelpPage.xaml.cs">
+      <DependentUpon>HelpPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="HomePage.xaml.cs">
+      <DependentUpon>HomePage.xaml</DependentUpon>
+    </Compile>
     <Compile Include="HumanPlayer.cs" />
     <Compile Include="MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>
+    <Compile Include="NewGame.xaml.cs">
+      <DependentUpon>NewGame.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Player.cs" />
     <Compile Include="PowerUp.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SpeedPowerUp.cs" />
     <Compile Include="Tile.cs" />
     <Compile Include="Wall.cs" />
     <Compile Include="XYCoordinates.cs" />
@@ -140,18 +159,26 @@
       <SubType>Designer</SubType>
     </AppxManifest>
     <None Include="bomberman_TemporaryKey.pfx" />
+    <None Include="TileClassDiagram.cd" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Assets\BibleTrump.png" />
-    <Content Include="Assets\Bear.png" />
     <Content Include="Assets\bomb.png" />
     <Content Include="Assets\BombStrUpgrade.png" />
     <Content Include="Assets\CountUpgrade.png" />
     <Content Include="Assets\crate.png" />
+    <Content Include="Assets\ExplodingBomb.png" />
     <Content Include="Assets\explosion.png" />
-    <Content Include="Assets\OmegaLUL.png" />
-    <Content Include="Assets\MonkaHmm.png" />
+    <Content Include="Assets\LargeBomb.png" />
+    <Content Include="Assets\PlayerIcons\Angry.png" />
+    <Content Include="Assets\PlayerIcons\derp.png" />
+    <Content Include="Assets\PlayerIcons\Drool.png" />
+    <Content Include="Assets\PlayerIcons\Fr.png" />
+    <Content Include="Assets\PlayerIcons\Great.png" />
+    <Content Include="Assets\PlayerIcons\Obese.png" />
+    <Content Include="Assets\PlayerIcons\Ree.png" />
+    <Content Include="Assets\PlayerIcons\thump.png" />
     <Content Include="Assets\redcatface.png" />
+    <Content Include="Assets\SmallBomb.png" />
     <Content Include="Assets\SpeedUpgrade.png" />
     <Content Include="Assets\wall1.jpg" />
     <Content Include="Properties\Default.rd.xml" />
@@ -168,9 +195,29 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Page Include="AboutPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="GamePage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="HelpPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="HomePage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="MainPage.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="NewGame.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
   <ItemGroup>
@@ -178,6 +225,7 @@
       <Version>6.2.3</Version>
     </PackageReference>
   </ItemGroup>
+  <ItemGroup />
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>
   </PropertyGroup>

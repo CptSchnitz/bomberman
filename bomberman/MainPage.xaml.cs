@@ -15,6 +15,7 @@ using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Media.Imaging;
 using Windows.UI.Xaml.Navigation;
 
+
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
 namespace bomberman
@@ -24,88 +25,50 @@ namespace bomberman
     /// </summary>
     public sealed partial class MainPage : Page
     {
-        private Board board;
-        HumanPlayer player;
-        List<Bomb> bombsList;
-        DispatcherTimer bombTimer;
-
         public MainPage()
         {
             this.InitializeComponent();
-            bombsList = new List<Bomb>();
-            bombTimer = new DispatcherTimer();
-            bombTimer.Interval = new TimeSpan(0, 0, 0, 0, 100);
-            bombTimer.Tick += BombTimer_Tick;
-            bombTimer.Start();
         }
 
-        private void BombTimer_Tick(object sender, object e)
+        private void SetNavViewHeader(String header)
         {
-            for (int i = bombsList.Count - 1; i >= 0; i--)
+            NavView.Header = header;
+        }
+
+        private void NavView_ItemInvoked(NavigationView sender, NavigationViewItemInvokedEventArgs args)
+        {
+            TextBlock itemContent = (TextBlock)args.InvokedItem;
+            if (itemContent != null)
             {
-                if (bombsList[i].Exploded)
-                    bombsList.RemoveAt(i);
-                else if (bombsList[i].Tick(board))
+                switch (itemContent.Tag)
                 {
-                    List<XYCoordinates> explosionCoordinates = board.ExplodeBomb(bombsList[i]);
-                    new Explosion(explosionCoordinates, canvas);
+                    case "Nav_Home":
+                        ContentFrame.Navigate(typeof(HomePage));
+                        SetNavViewHeader("Home");
+                        break;
+                    case "Nav_NewGame":
+                        ContentFrame.Navigate(typeof(NewGame));
+                        SetNavViewHeader("New Game");
+                        break;
+                    case "Nav_Help":
+                        ContentFrame.Navigate(typeof(HelpPage));
+                        SetNavViewHeader("Help");
+                        break;
+                    case "Nav_About":
+                        ContentFrame.Navigate(typeof(AboutPage));
+                        SetNavViewHeader("About");
+                        break;
                 }
             }
         }
 
-        private void DrawGame()
-        {           
-            board = new Board(canvas);
-
-            Image image = new Image
-            {
-                Height = 50,
-                Width = 50,
-                HorizontalAlignment = HorizontalAlignment.Stretch,
-                VerticalAlignment = VerticalAlignment.Stretch,
-                //RenderTransformOrigin = new Point(0.5, 0.5)
-            };
-            player = new HumanPlayer(25, 25, image);
-            Canvas.SetTop(image, 0);
-            Canvas.SetLeft(image, 0);
-            canvas.Children.Add(image);
-        }
-
-        protected override void OnNavigatedTo(NavigationEventArgs e)
+        private void NavView_Loaded(object sender, RoutedEventArgs e)
         {
-            CoreWindow.GetForCurrentThread().KeyDown += MainPage_KeyDown;
-            DrawGame();
-        }
-
-        protected override void OnNavigatedFrom(NavigationEventArgs e)
-        {
-            CoreWindow.GetForCurrentThread().KeyDown -= MainPage_KeyDown;
-        }
-
-        private void MainPage_KeyDown(CoreWindow sender, KeyEventArgs args)
-        {
-            Windows.System.VirtualKey key = args.VirtualKey;
-            switch (key)
-            {
-                case Windows.System.VirtualKey.W: // up
-
-                    player.MoveUp(board);
-                    break;
-                case Windows.System.VirtualKey.A: // left
-                    player.MoveLeft(board);
-                    break;
-                case Windows.System.VirtualKey.S: // down
-                    player.MoveDown(board);
-                    break;
-                case Windows.System.VirtualKey.D: // right
-                    player.MoveRight(board);
-                    break;
-                case Windows.System.VirtualKey.Space:
-                    if (player.DropBomb(board, out Bomb bomb))
-                        bombsList.Add(bomb);
-                    break;
-
-            }
+            NavView.SelectedItem = NavView.MenuItems[0];
+            SetNavViewHeader("Home");
+            ContentFrame.Navigate(typeof(HomePage));
         }
     }
 }
+
+

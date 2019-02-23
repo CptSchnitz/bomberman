@@ -11,17 +11,17 @@ namespace bomberman
 {
     class Explosion
     {
-        Canvas canvas;
-        Image[] explosions;
-        int explosionTimeMiliSec = 2000;
-        DispatcherTimer timer;
+        Canvas _canvas;
+        Image[] _explosions;
+        int _explosionTimeMiliSec = 500;
+        DispatcherTimer _timer;
 
 
-        public Explosion(List<XYCoordinates> explosionLocation, Canvas canvas)
+        public Explosion(List<Tile> explodedTiles, Canvas canvas)
         {
-            this.canvas = canvas;
-            explosions = new Image[explosionLocation.Count];
-            for (int i = 0; i < explosionLocation.Count; i++)
+            _canvas = canvas;
+            _explosions = new Image[explodedTiles.Count];
+            for (int i = 0; i < explodedTiles.Count; i++)
             {
                 Image image = new Image
                 {
@@ -31,34 +31,34 @@ namespace bomberman
                     VerticalAlignment = VerticalAlignment.Stretch,
                     Source = new BitmapImage(new Uri("ms-appx:///Assets/explosion.png"))
                 };
-                Canvas.SetTop(image, explosionLocation[i].Y);
-                Canvas.SetLeft(image, explosionLocation[i].X);
+                Canvas.SetTop(image, Canvas.GetTop(explodedTiles[i].Image));
+                Canvas.SetLeft(image, Canvas.GetLeft(explodedTiles[i].Image));
                 Canvas.SetZIndex(image, 2);
                 canvas.Children.Add(image);
-                explosions[i] = image;
+                _explosions[i] = image;
             }
 
-            timer = new DispatcherTimer();
-            timer.Interval = new TimeSpan(0, 0, 0, 0, explosionTimeMiliSec);
-            timer.Tick += Timer_Tick;
-            timer.Start();
+            _timer = new DispatcherTimer();
+            _timer.Interval = new TimeSpan(0, 0, 0, 0, _explosionTimeMiliSec);
+            _timer.Tick += Timer_Tick;
+            _timer.Start();
         }
         
 
         private void Timer_Tick(object sender, object e)
         {
-            UIElementCollection canvasChildrens = canvas.Children;
+            UIElementCollection canvasChildrens = _canvas.Children;
             int canvasChildIndex = canvasChildrens.Count - 1;
 
-            for (int i = explosions.GetLength(0) - 1; i >= 0; i--)
+            for (int i = _explosions.GetLength(0) - 1; i >= 0; i--)
             {
-                while (!ReferenceEquals(explosions[i], canvasChildrens[canvasChildIndex]))
+                while (!ReferenceEquals(_explosions[i], canvasChildrens[canvasChildIndex]))
                 {
                     canvasChildIndex--;
                 }
                 canvasChildrens.RemoveAt(canvasChildIndex--);
             }
-            timer.Stop();
+            _timer.Stop();
         }
     }
 }

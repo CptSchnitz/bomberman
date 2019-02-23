@@ -4,28 +4,24 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Windows.UI.Xaml.Controls;
-using Windows.UI.Xaml.Media.Imaging;
 
 namespace bomberman
 {
     class Wall : Tile
     {
-        public Wall(Image image) : base (image)
+        public Wall(Image image) : base (image, "Assets/wall1.jpg")
         {
-            _image.Source = new BitmapImage(new Uri("ms-appx:///Assets/wall1.jpg"));
+            
         }
 
-        public override bool IsPassable()
+        public override bool IsPassable(Player player)
         {
             return false;
         }
 
-        public override bool BlocksExplosion
+        public override bool IsBlocksExplosion()
         {
-            get
-            {
-                return true;
-            }
+            return true;
         }
     }
 }

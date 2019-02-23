@@ -9,7 +9,7 @@ namespace bomberman
 {
     class PowerUp : Tile
     {
-        public PowerUp(Image image) : base (image)
+        public PowerUp(Image image, string imageSource) : base (image, imageSource)
         {
 
         }
@@ -19,12 +19,9 @@ namespace bomberman
 
         }
 
-        public override bool IsDestructable
+        public override bool IsDestructable()
         {
-            get
-            {
-                return true;
-            }
-        }        
+            return true;
+        }
     }
 }
