@@ -63,7 +63,6 @@ namespace bomberman
                 case int num when _ticksToExplode % 2 == 0:
                     _image.Source = new BitmapImage(new Uri($"ms-appx:///{_largeBombSource}"));
                     break;
-
                 case int num when _ticksToExplode % 2 == 1:
                     _image.Source = new BitmapImage(new Uri($"ms-appx:///{_smallBombSource}"));
                     break;

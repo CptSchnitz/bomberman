@@ -126,6 +126,8 @@
     <Compile Include="Bomb.cs" />
     <Compile Include="BombCountPowerUp.cs" />
     <Compile Include="BombStrPowerUp.cs" />
+    <Compile Include="KeyAction.cs" />
+    <Compile Include="ControlScheme.cs" />
     <Compile Include="Crate.cs" />
     <Compile Include="Direction.cs" />
     <Compile Include="Explosion.cs" />
@@ -152,7 +154,6 @@
     <Compile Include="SpeedPowerUp.cs" />
     <Compile Include="Tile.cs" />
     <Compile Include="Wall.cs" />
-    <Compile Include="XYCoordinates.cs" />
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest">

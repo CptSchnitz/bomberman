@@ -48,15 +48,9 @@ namespace bomberman
         private void Timer_Tick(object sender, object e)
         {
             UIElementCollection canvasChildrens = _canvas.Children;
-            int canvasChildIndex = canvasChildrens.Count - 1;
-
-            for (int i = _explosions.GetLength(0) - 1; i >= 0; i--)
+            foreach (Image image in _explosions)
             {
-                while (!ReferenceEquals(_explosions[i], canvasChildrens[canvasChildIndex]))
-                {
-                    canvasChildIndex--;
-                }
-                canvasChildrens.RemoveAt(canvasChildIndex--);
+                canvasChildrens.Remove(image);
             }
             _timer.Stop();
         }

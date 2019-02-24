@@ -28,6 +28,9 @@ namespace bomberman
         string[] _playerIconsPath = { "ms-appx:///Assets/PlayerIcons/Angry.png", "ms-appx:///Assets/PlayerIcons/derp.png",
             "ms-appx:///Assets/PlayerIcons/Drool.png", "ms-appx:///Assets/PlayerIcons/Fr.png", "ms-appx:///Assets/PlayerIcons/Great.png",
             "ms-appx:///Assets/PlayerIcons/Obese.png", "ms-appx:///Assets/PlayerIcons/Ree.png", "ms-appx:///Assets/PlayerIcons/thump.png"};
+        string[] _controlSchemes = { "Arrows", "WASD","Gamepad"};
+        Selector[] _gridViews;
+        Selector[] _comboBoxes;
 
         public NewGame()
         {
@@ -37,54 +40,49 @@ namespace bomberman
 
         private void NewGame_Loaded(object sender, RoutedEventArgs e)
         {
-            comboBoxNumOfPlayers.SelectionChanged += ComboBox_SelectionChanged;
+            comboBoxNumOfPlayers.SelectionChanged += ComboBoxNumOfPlayers_SelectionChanged;
+            _gridViews = new Selector[3];
+            _comboBoxes = new Selector[3];
+            _gridViews[0] = gridView1;
+            _gridViews[1] = gridView2;
+            _gridViews[2] = gridView3;
+            _comboBoxes[0] = comboBoxPlayerScheme1;
+            _comboBoxes[1] = comboBoxPlayerScheme2;
+            _comboBoxes[2] = comboBoxPlayerScheme3;
         }
 
-        private void GridView_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            GridView senderGridView = sender as GridView;
-            int senderGridSelectedIndex = senderGridView.SelectedIndex;
-
-
-            if (!ReferenceEquals(senderGridView, gridView1) && (gridView1.SelectedIndex == senderGridSelectedIndex))
-                gridView1.SelectedIndex = -1;
-
-            if (!ReferenceEquals(senderGridView, gridView2) && (gridView2.SelectedIndex == senderGridSelectedIndex))
-                gridView2.SelectedIndex = -1;
-
-            if (!ReferenceEquals(senderGridView, gridView3) && (gridView3.SelectedIndex == senderGridSelectedIndex))
-                gridView3.SelectedIndex = -1;
+            Selector selector = sender as Selector;
+            if (selector is GridView)
+                CheckForSameSelections(selector,_gridViews);
+            else
+                CheckForSameSelections(selector, _comboBoxes);
 
             btnStartGame.IsEnabled = CheckToEnableStartGameButton();
         }
 
+        private void CheckForSameSelections(Selector selectedControl, Selector[] controlsWithSelection)
+        {
+            int senderSelectedIndex = selectedControl.SelectedIndex;
+            for (int i = 0; i < controlsWithSelection.Length; i++)
+            {
+                if (!ReferenceEquals(selectedControl, controlsWithSelection[i]) && (controlsWithSelection[i].SelectedIndex == senderSelectedIndex))
+                    controlsWithSelection[i].SelectedIndex = -1;
+            }
+        }
+
         private bool CheckToEnableStartGameButton()
         {
-            switch (comboBoxNumOfPlayers.SelectedIndex)
+            for (int i = comboBoxNumOfPlayers.SelectedIndex; i >= 0; i--)
             {
-                case 2:
-                    if (gridView3.SelectedIndex == -1)
-                    {
-                        return false;
-                    }
-                    goto case 1;
-                case 1:
-                    if (gridView2.SelectedIndex == -1)
-                    {
-                        return false;
-                    }
-                    goto case 0;
-                case 0:
-                    if (gridView1.SelectedIndex == -1)
-                    {
-                        return false;
-                    }
-                    break;
+                if (_gridViews[i].SelectedIndex == -1 || _comboBoxes[i].SelectedIndex == -1)
+                    return false;
             }
             return true;
         }
 
-        private void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void ComboBoxNumOfPlayers_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             ComboBox comboBox = sender as ComboBox;
             switch (comboBox.SelectedIndex)
@@ -107,10 +105,32 @@ namespace bomberman
 
         private void BtnStartGame_Click(object sender, RoutedEventArgs e)
         {
+            (ControlScheme controlScheme, string iconPath)[] parameters = 
+                new (ControlScheme controlScheme, string iconPath)[comboBoxNumOfPlayers.SelectedIndex+1];
+
+            for (int i = 0; i < parameters.Length; i++)
+            {
+                ControlScheme scheme = null;
+                switch(_comboBoxes[i].SelectedIndex)
+                {
+                    case 0:
+                        scheme = ControlScheme.Arrows;
+                        break;
+                    case 1:
+                        scheme = ControlScheme.WASD;
+                        break;
+                    case 2:
+                        scheme = ControlScheme.Gamepad;
+                        break;
+
+                }
+                parameters[i] = (scheme, _gridViews[i].SelectedValue.ToString());
+            }
+
             NavigationView navView = Frame.Parent as NavigationView;
             Page page = navView.Parent as MainPage;
             Frame frame = page.Parent as Frame;
-            frame.Navigate(typeof(GamePage));
+            frame.Navigate(typeof(GamePage), parameters);
         }
     }
 }

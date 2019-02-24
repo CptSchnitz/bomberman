@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Windows.Foundation;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 
@@ -12,14 +13,14 @@ namespace bomberman
     {
         private Tile[,] _board;
         Random _random;
-        public XYCoordinates MaxCoordinates { get; }
+        public Point MaxCoordinates { get; }
 
         public Board(Canvas canvas)
         {
             _random = new Random();
             // fix next two lines (use fields mb)
             _board = new Tile[15, 17];
-            MaxCoordinates = new XYCoordinates(_board.GetLength(1) * 50, _board.GetLength(0) * 50);
+            MaxCoordinates = new Point(_board.GetLength(1) * 50, _board.GetLength(0) * 50);
 
             for (int i = 0; i < _board.GetLength(0); i++)
             {
@@ -54,16 +55,16 @@ namespace bomberman
             }
         }
 
-        public XYCoordinates[] SpawnLocation
+        public Point[] SpawnLocation
         {
             get
             {
-                XYCoordinates[] locations =
+                Point[] locations =
                     {
-                    new XYCoordinates(25, 25),
-                    new XYCoordinates(25,725),
-                    new XYCoordinates(825,25),
-                    new XYCoordinates(825,725),
+                    new Point(25, 25),
+                    new Point(25,725),
+                    new Point(825,25),
+                    new Point(825,725),
                 };
                 return locations;
             }
@@ -85,7 +86,7 @@ namespace bomberman
         public void OnPlayerMovement(object sender, EventArgs e)
         {
             Player player = sender as Player;
-            List<Tile> corners = GetUniqueCornerTilesFromCoordinates(player.GetCenter());
+            List<Tile> corners = GetUniqueCornerTilesFromCenterPoint(player.GetCenter());
             foreach (Tile cornerTile in corners)
                 if (cornerTile is PowerUp powerUp)
                 {
@@ -95,13 +96,13 @@ namespace bomberman
                 }
         }
 
-        public bool IsMovePossible(XYCoordinates CenterCoordinates, Player player)
+        public bool IsMovePossible(Point CenterPoint, Player player)
         {
             // out of bounds check
-            if (CenterCoordinates.Y - 25 < 0 || CenterCoordinates.X - 25 < 0 || CenterCoordinates.Y + 25 > MaxCoordinates.Y || CenterCoordinates.X + 25 > MaxCoordinates.X)
+            if (CenterPoint.Y - 25 < 0 || CenterPoint.X - 25 < 0 || CenterPoint.Y + 25 > MaxCoordinates.Y || CenterPoint.X + 25 > MaxCoordinates.X)
                 return false;
 
-            List<Tile> corners = GetUniqueCornerTilesFromCoordinates(CenterCoordinates);
+            List<Tile> corners = GetUniqueCornerTilesFromCenterPoint(CenterPoint);
             foreach (Tile cornerTile in corners)
                 if (!cornerTile.IsPassable(player))
                     return false;
@@ -110,28 +111,28 @@ namespace bomberman
 
         public bool IsPlayerInTile(Player player, Tile tile)
         {
-            List<Tile> corners = GetUniqueCornerTilesFromCoordinates(player.GetCenter());
+            List<Tile> corners = GetUniqueCornerTilesFromCenterPoint(player.GetCenter());
             foreach (Tile cornerTile in corners)
                 if (ReferenceEquals(cornerTile, tile))
                     return true;
             return false;
         }
 
-        public List<Tile> GetUniqueCornerTilesFromCoordinates(XYCoordinates Coordinates)
+        public List<Tile> GetUniqueCornerTilesFromCenterPoint(Point point)
         {
             List<Tile> corners = new List<Tile>();
-            Tile tile = _board[((int)Coordinates.Y - 24) / 50, ((int)Coordinates.X - 24) / 50];
+            Tile tile = _board[((int)point.Y - 24) / 50, ((int)point.X - 24) / 50];
             corners.Add(tile);
 
-            tile = _board[((int)Coordinates.Y + 24) / 50, ((int)Coordinates.X - 24) / 50];
+            tile = _board[((int)point.Y + 24) / 50, ((int)point.X - 24) / 50];
             if (!corners.Contains(tile))
                 corners.Add(tile);
 
-            tile = _board[((int)Coordinates.Y - 24) / 50, ((int)Coordinates.X + 24) / 50];
+            tile = _board[((int)point.Y - 24) / 50, ((int)point.X + 24) / 50];
             if (!corners.Contains(tile))
                 corners.Add(tile);
 
-            tile = _board[((int)Coordinates.Y + 24) / 50, ((int)Coordinates.X + 24) / 50];
+            tile = _board[((int)point.Y + 24) / 50, ((int)point.X + 24) / 50];
             if (!corners.Contains(tile))
                 corners.Add(tile);
 

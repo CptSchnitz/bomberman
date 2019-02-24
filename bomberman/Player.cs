@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Windows.Foundation;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Media.Imaging;
@@ -11,7 +12,7 @@ namespace bomberman
 {
     class Player
     {
-        protected XYCoordinates _centerCoordinate;
+        protected Point _centerPoint;
         protected Image _image;
         private readonly int _maxBombCount = 5;
         private int _currentMaxBombCount = 1;
@@ -25,9 +26,9 @@ namespace bomberman
         private double _moveSpeed = 12.5;
 
 
-        protected Player(XYCoordinates spawnCoordinates, Canvas canvas, string imageSource)
+        protected Player(Point spawnPoint, Canvas canvas, string imageSource)
         {
-            _centerCoordinate = spawnCoordinates;
+            _centerPoint = spawnPoint;
             _image = new Image
             {
                 Height = 50,
@@ -35,10 +36,10 @@ namespace bomberman
                 HorizontalAlignment = HorizontalAlignment.Stretch,
                 VerticalAlignment = VerticalAlignment.Stretch,
             };
-            Canvas.SetTop(_image, _centerCoordinate.Y - 25);
-            Canvas.SetLeft(_image, _centerCoordinate.X - 25);
+            Canvas.SetTop(_image, _centerPoint.Y - 25);
+            Canvas.SetLeft(_image, _centerPoint.X - 25);
             canvas.Children.Add(_image);
-            _image.Source = new BitmapImage(new Uri($"ms-appx:///{imageSource}"));
+            _image.Source = new BitmapImage(new Uri($"{imageSource}"));
             _currentBombCount = _currentMaxBombCount;
         }
 
@@ -66,53 +67,72 @@ namespace bomberman
             }
         }
 
-        public XYCoordinates GetCenter()
+        public Point GetCenter()
         {
-            return _centerCoordinate;
+            return _centerPoint;
         }
 
-        public void MoveLeft(Board board)
+        protected void Move(KeyAction keyAction, Board board)
         {
-            XYCoordinates newCenter = new XYCoordinates(_centerCoordinate.X - MoveSpeed, _centerCoordinate.Y);
+            switch (keyAction)
+            {
+                case KeyAction.Up:
+                    MoveUp(board);
+                    break;
+                case KeyAction.Down:
+                    MoveDown(board);
+                    break;
+                case KeyAction.Left:
+                    MoveLeft(board);
+                    break;
+                case KeyAction.Right:
+                    MoveRight(board);
+                    break;
+            }
+        }
+
+        private void MoveLeft(Board board)
+        {
+            Point newCenter = new Point(_centerPoint.X - MoveSpeed, _centerPoint.Y);
             if (board.IsMovePossible(newCenter, this))
             {
-                _centerCoordinate = newCenter;
+                _centerPoint = newCenter;
                 Canvas.SetLeft(_image, Canvas.GetLeft(_image) - MoveSpeed);
                 UpgradeMoveSpeedIfNeeded();
                 OnPlayerMovement();
                 //board.OnPlayerMovement(this);
             }
         }
-        public void MoveUp(Board board)
+        private void MoveUp(Board board)
         {
-            XYCoordinates newCenter = new XYCoordinates(_centerCoordinate.X, _centerCoordinate.Y - MoveSpeed);
+            Point newCenter = new Point(_centerPoint.X, _centerPoint.Y - MoveSpeed);
             if (board.IsMovePossible(newCenter, this))
             {
-                _centerCoordinate = newCenter;
+                _centerPoint = newCenter;
                 Canvas.SetTop(_image, Canvas.GetTop(_image) - MoveSpeed);
                 UpgradeMoveSpeedIfNeeded();
                 OnPlayerMovement();
                 //board.OnPlayerMovement(this);
             }
         }
-        public void MoveRight(Board board)
+        private void MoveRight(Board board)
         {
-            XYCoordinates newCenter = new XYCoordinates(_centerCoordinate.X + MoveSpeed, _centerCoordinate.Y);
+            Point newCenter = new Point(_centerPoint.X + MoveSpeed, _centerPoint.Y);
             if (board.IsMovePossible(newCenter, this))
             {
-                _centerCoordinate = newCenter;
+                _centerPoint = newCenter;
                 Canvas.SetLeft(_image, Canvas.GetLeft(_image) + MoveSpeed);
                 UpgradeMoveSpeedIfNeeded();
                 OnPlayerMovement();
                 //board.OnPlayerMovement(this);
             }
         }
-        public void MoveDown(Board board)
+        private void MoveDown(Board board)
         {
-            XYCoordinates newCenter = new XYCoordinates(_centerCoordinate.X, _centerCoordinate.Y + MoveSpeed);
+            Point newCenter = new Point(_centerPoint.X, _centerPoint.Y + MoveSpeed);
             if (board.IsMovePossible(newCenter, this))
             {
-                _centerCoordinate = newCenter;
+                _centerPoint = newCenter;
                 Canvas.SetTop(_image, Canvas.GetTop(_image) + MoveSpeed);
                 UpgradeMoveSpeedIfNeeded();
                 OnPlayerMovement();

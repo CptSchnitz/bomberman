@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Windows.Foundation;
 using Windows.UI.Core;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
@@ -17,20 +18,28 @@ namespace bomberman
         DispatcherTimer _gameTimer;
 
 
-        public Game(Canvas canvas, int NumOfPlayers)
+        public Game(Canvas canvas, (ControlScheme controlScheme, string iconPath)[] HumanPlayerInfo)
         {
             _canvas = canvas;
             _board = new Board(_canvas);
-            XYCoordinates[] SpawnLocations = _board.SpawnLocation;
-            _players = new HumanPlayer[2];
+            Point[] SpawnLocations = _board.SpawnLocation;
+            _players = new HumanPlayer[HumanPlayerInfo.Length];
             for (int i = 0; i < _players.Length; i++)
             {
-                _players[i] = new HumanPlayer(SpawnLocations[i], _canvas);
+                _players[i] = new HumanPlayer(SpawnLocations[i], HumanPlayerInfo[i].controlScheme, HumanPlayerInfo[i].iconPath, _canvas);
                 _players[i].PlayerMovement += _board.OnPlayerMovement;
             }
             _gameTimer = new DispatcherTimer();
             _gameTimer.Interval = new TimeSpan(0, 0, 0, 0, 250);
             _gameTimer.Tick += _gameTimer_Tick;
+        }
+
+        public Board Board
+        {
+            get
+            {
+                return _board;
+            }
         }
 
         private void _gameTimer_Tick(object sender, object e)
@@ -74,12 +83,12 @@ namespace bomberman
             _gameTimer.Start();
         }
 
-        private void Bomb_BombExplosion(object sender, EventArgs e)
+        public void Bomb_BombExplosion(object sender, EventArgs e)
         {
             Bomb bomb = sender as Bomb;
             List<Tile> explodedTiles = _board.ExplodeBomb(bomb);
             new Explosion(explodedTiles, _canvas);
-            CheckForPlayersHitByBomb(explodedTiles); ;
+            CheckForPlayersHitByBomb(explodedTiles);
         }
 
         private void CheckForPlayersHitByBomb(List<Tile> explodedTiles)
@@ -99,41 +108,12 @@ namespace bomberman
         {
 
             Windows.System.VirtualKey key = args.VirtualKey;
-            switch (key)
+            foreach (HumanPlayer humanPlayer in _players)
             {
-                case Windows.System.VirtualKey.W when _players[0].Alive: // up
-                    _players[0].MoveUp(_board);
-                    break;
-                case Windows.System.VirtualKey.A when _players[0].Alive: // left
-                    _players[0].MoveLeft(_board);
-                    break;
-                case Windows.System.VirtualKey.S when _players[0].Alive: // down
-                    _players[0].MoveDown(_board);
-                    break;
-                case Windows.System.VirtualKey.D when _players[0].Alive: // right
-                    _players[0].MoveRight(_board);
-                    break;
-                case Windows.System.VirtualKey.Space when _players[0].Alive:
-                    if (_players[0].DropBomb(_board, out Bomb bomb))
-                        bomb.BombExplosion += Bomb_BombExplosion;
-                    break;
-                case Windows.System.VirtualKey.GamepadDPadUp when _players[1].Alive: // up
-                    _players[1].MoveUp(_board);
-                    break;
-                case Windows.System.VirtualKey.GamepadDPadLeft when _players[1].Alive: // left
-                    _players[1].MoveLeft(_board);
-                    break;
-                case Windows.System.VirtualKey.GamepadDPadDown when _players[1].Alive: // down
-                    _players[1].MoveDown(_board);
-                    break;
-                case Windows.System.VirtualKey.GamepadDPadRight when _players[1].Alive: // right
-                    _players[1].MoveRight(_board);
-                    break;
-                case Windows.System.VirtualKey.GamepadA when _players[1].Alive:
-                    if (_players[1].DropBomb(_board, out Bomb bomb2))
-                        bomb2.BombExplosion += Bomb_BombExplosion;
-                    break;
+                if (humanPlayer.Alive && humanPlayer.ControlScheme.IsKeyInScheme(key))
+                    humanPlayer.MoveBasedOnKey(key, this);
             }
+           
         }
         protected virtual void OnGameOver(GameOverEventArgs e)
         {

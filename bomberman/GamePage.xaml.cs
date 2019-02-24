@@ -24,15 +24,21 @@ namespace bomberman
     public sealed partial class GamePage : Page
     {
         Game game;
+        (ControlScheme controlScheme, string iconPath)[] gameParameters;
         public GamePage()
         {
             this.InitializeComponent();
             this.Loaded += MainPage_Loaded;
         }
 
+        protected override void OnNavigatedTo(NavigationEventArgs e)
+        {
+            gameParameters = ((ControlScheme controlScheme, string iconPath)[])e.Parameter;
+            base.OnNavigatedTo(e);
+        }
         private void MainPage_Loaded(object sender, RoutedEventArgs e)
         {
-            game = new Game(canvas, 4);
+            game = new Game(canvas, gameParameters);
             game.GameOver += GameOver;
         }
 
@@ -45,6 +51,7 @@ namespace bomberman
                 txtWinner.Text = "Draw";
             else
                 txtWinner.Text = $"Player {(e.Winner + 1).ToString()} Won";
+            game.GameOver -= GameOver;
         }
 
         protected override void OnNavigatedFrom(NavigationEventArgs e)
@@ -63,6 +70,15 @@ namespace bomberman
         private void BtnToMainPage_Click(object sender, RoutedEventArgs e)
         {
             Frame.Navigate(typeof(MainPage));
+        }
+
+        private void BtnRestart_Click(object sender, RoutedEventArgs e)
+        {
+            stackPanelEndGame.Visibility = Visibility.Collapsed;
+            canvas.Children.Clear();
+            game = new Game(canvas, gameParameters);
+            game.GameOver += GameOver;
+            StartGame.Visibility = Visibility.Visible;
         }
     }
 }

@@ -30,6 +30,7 @@
             <StackPanel x:Name="stackPanelEndGame" Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center" Visibility="Collapsed">
                 <TextBlock x:Name="txtWinner"/>
                 <Button x:Name="btnToMainPage" Content="Back To Main Page" Click="BtnToMainPage_Click"/>
+                <Button x:Name="btnRestart" Content="Restart" Click="BtnRestart_Click"/>
             </StackPanel>
             <Rectangle Grid.Row="2">
                 <Rectangle.Fill>
