@@ -7,7 +7,6 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-
     <Grid>
         <Canvas x:Name="canvas" Height="750" Width="850" Background="DarkOliveGreen"/>
         <Grid x:Name="ForegroundGrid" Height="750" Width="850">
@@ -26,11 +25,15 @@
                     <SolidColorBrush Color="Black" Opacity="0.95"/>
                 </Rectangle.Fill>
             </Rectangle>
-            <Button x:Name="StartGame" Grid.Row="1" Content="Start Game" VerticalAlignment="Center" HorizontalAlignment="Center" Click="StartGame_Click"/>
+            <Button x:Name="btnStartGame" Grid.Row="1" Content="Start Game" VerticalAlignment="Center" HorizontalAlignment="Center" Click="StartGame_Click"/>
+            <TextBlock x:Name="txtCountdown" Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center" Visibility="Collapsed"/>
+            <TextBlock x:Name="txtPaused" Text="Paused" Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center" Visibility="Collapsed"/>
             <StackPanel x:Name="stackPanelEndGame" Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center" Visibility="Collapsed">
-                <TextBlock x:Name="txtWinner"/>
-                <Button x:Name="btnToMainPage" Content="Back To Main Page" Click="BtnToMainPage_Click"/>
-                <Button x:Name="btnRestart" Content="Restart" Click="BtnRestart_Click"/>
+                <TextBlock x:Name="txtWinner" HorizontalAlignment="Center" Margin="0,0,0,10"/>
+                <StackPanel Orientation="Horizontal">
+                    <Button x:Name="btnToMainPage" Content="Home Page" Click="BtnToMainPage_Click" Margin="0,0,10,0"/>
+                    <Button x:Name="btnRestart" Content="Restart" Click="BtnRestart_Click"/>
+                </StackPanel>
             </StackPanel>
             <Rectangle Grid.Row="2">
                 <Rectangle.Fill>
@@ -39,4 +42,5 @@
             </Rectangle>
         </Grid>
     </Grid>
+
 </Page>

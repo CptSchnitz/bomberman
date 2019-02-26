@@ -14,10 +14,12 @@ namespace bomberman
         private Tile[,] _board;
         Random _random;
         public Point MaxCoordinates { get; }
+        private int _numOfCrates;
 
         public Board(Canvas canvas)
         {
             _random = new Random();
+            _numOfCrates = 0;
             // fix next two lines (use fields mb)
             _board = new Tile[15, 17];
             MaxCoordinates = new Point(_board.GetLength(1) * 50, _board.GetLength(0) * 50);
@@ -49,6 +51,10 @@ namespace bomberman
                     {
                         tile = new Tile(image);
                     }
+                    else
+                    {
+                        _numOfCrates++;
+                    }
 
                     _board[i, j] = tile;
                 }
@@ -64,20 +70,36 @@ namespace bomberman
                     new Point(25, 25),
                     new Point(25,725),
                     new Point(825,25),
-                    new Point(825,725),
+                    new Point(825,725)
                 };
                 return locations;
             }
         }
 
-        public bool PlaceBomb(Player bombOwner, int bombStr, out Bomb bomb)
+        public int NumOfCrates
         {
-            bomb = null;
-            int column = (int)bombOwner.GetCenter().X / 50;
-            int row = (int)bombOwner.GetCenter().Y / 50;
+            get
+            {
+                return _numOfCrates;
+            }
+        }
+
+        public bool PlaceBomb(Player bombOwner, int bombStr, Game game)
+        {
+            int column = (int)bombOwner.Center.X / 50;
+            int row = (int)bombOwner.Center.Y / 50;
+
+            foreach (Player player in game.Players)
+            {
+                if (!ReferenceEquals(bombOwner, player) && player.Alive && IsPlayerInTile(player, _board[row, column]))
+                    return false;
+            }
+
             if (!(_board[row, column] is Bomb))
             {
-                _board[row, column] = bomb = new Bomb(_board[row, column].Image, bombOwner, this);
+                Bomb bomb = new Bomb(_board[row, column].Image, bombOwner, game);
+                _board[row, column] = bomb;
+                bomb.BombExplosion += game.OnBombExplosion;
                 return true;
             }
             return false;
@@ -86,7 +108,7 @@ namespace bomberman
         public void OnPlayerMovement(object sender, EventArgs e)
         {
             Player player = sender as Player;
-            List<Tile> corners = GetUniqueCornerTilesFromCenterPoint(player.GetCenter());
+            List<Tile> corners = GetUniqueCornerTilesFromCenterPoint(player.Center);
             foreach (Tile cornerTile in corners)
                 if (cornerTile is PowerUp powerUp)
                 {
@@ -111,7 +133,7 @@ namespace bomberman
 
         public bool IsPlayerInTile(Player player, Tile tile)
         {
-            List<Tile> corners = GetUniqueCornerTilesFromCenterPoint(player.GetCenter());
+            List<Tile> corners = GetUniqueCornerTilesFromCenterPoint(player.Center);
             foreach (Tile cornerTile in corners)
                 if (ReferenceEquals(cornerTile, tile))
                     return true;
@@ -195,7 +217,7 @@ namespace bomberman
                 }
                 else
                 {
-                    BombAOE.Add(_board[row,column]);
+                    BombAOE.Add(_board[row, column]);
                     row--;
                     bombStr--;
                 }
@@ -257,7 +279,6 @@ namespace bomberman
             }
             return BombAOE;
         }
-
         private bool HandleSpecialTileCasesInExplosion(int row, int column, List<Tile> BombAOE, Direction bombRelativeDirection)
         {
             if (_board[row, column] is Bomb bomb)
@@ -269,7 +290,8 @@ namespace bomberman
             Tile tile = new Tile(_board[row, column].Image);
             bool flag = false;
             if (_board[row, column] is Crate crate)
-            {                
+            {
+                _numOfCrates--;
                 switch (_random.Next() % 9)
                 {
                     case 0:
@@ -282,7 +304,7 @@ namespace bomberman
                         tile = new BombStrPowerUp(_board[row, column].Image);
                         break;
                 }
-                flag =  true;
+                flag = true;
             }
             else if (_board[row, column].IsDestructable())
             {
@@ -293,5 +315,88 @@ namespace bomberman
             return flag;
         }
 
+        public bool IsLocationSafe(Point point)
+        {
+            List<Tile> tileList = GetUniqueCornerTilesFromCenterPoint(point);
+            foreach (Tile tile in tileList)
+            {
+                if (!IsTileSafe(tile))
+                    return false;
+            }
+            return true;
+
+        }
+
+        private bool IsTileSafe(Tile tile)
+        {
+            if (tile is Bomb)
+                return false;
+
+            TryGettingTileLocation(tile, out int row, out int col);
+            bool UpChecked = false, DownChecked = false, LeftChecked = false, RightChecked = false;
+            for (int i = 1; i <= 5; i++)
+            {
+                bool isTileSafe = true;
+                if (!UpChecked && (row - i < 0 || IsTileSafeHelper(row - i, col, i, out isTileSafe)))
+                {
+                    if (!isTileSafe)
+                        return false;
+                    UpChecked = true;
+                }
+                isTileSafe = true;
+                if (!DownChecked && (row + i == _board.GetLength(0) || IsTileSafeHelper(row + i, col, i, out isTileSafe)))
+                {
+                    if (!isTileSafe)
+                        return false;
+                    DownChecked = true;
+                }
+                isTileSafe = true;
+                if (!LeftChecked && (col - i < 0 || IsTileSafeHelper(row, col - i, i, out isTileSafe)))
+                {
+                    if (!isTileSafe)
+                        return false;
+                    LeftChecked = true;
+                }
+                isTileSafe = true;
+                if (!RightChecked && (col + i == _board.GetLength(1) || IsTileSafeHelper(row, col + i, i, out isTileSafe)))
+                {
+                    if (!isTileSafe)
+                        return false;
+                    RightChecked = true;
+                }
+            }
+            return true;
+        }
+
+        public bool IsNextToCrate(Player player)
+        {
+            int curRow = (int)player.Center.Y / 50;
+            int curCol = (int)player.Center.X / 50;
+            if (curRow - 1 > 0 && _board[curRow - 1, curCol] is Crate)
+                return true;
+            if (curRow + 1 < _board.GetLength(0) && _board[curRow + 1, curCol] is Crate)
+                return true;
+            if (curCol - 1 > 0 && _board[curRow, curCol - 1] is Crate)
+                return true;
+            if (curCol + 1 < _board.GetLength(1) && _board[curRow, curCol + 1] is Crate)
+                return true;
+            return false;
+        }
+        // the return value decides if theres a result about the saftey of the tile.
+        private bool IsTileSafeHelper(int row, int col, int distanceFromTile, out bool isTileSafe)
+        {
+            isTileSafe = true;
+            if (_board[row, col] is Crate || _board[row, col].IsBlocksExplosion())
+            {
+                isTileSafe = true;
+                return true;
+            }
+            if (_board[row, col] is Bomb bomb)
+            {
+                isTileSafe = bomb.Strength < distanceFromTile;
+                return true;
+            }
+            return false;
+        }
     }
 }

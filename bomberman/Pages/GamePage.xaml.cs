@@ -25,6 +25,7 @@ namespace bomberman
     {
         Game game;
         (ControlScheme controlScheme, string iconPath)[] gameParameters;
+        int _countdownCount;
         public GamePage()
         {
             this.InitializeComponent();
@@ -38,13 +39,13 @@ namespace bomberman
         }
         private void MainPage_Loaded(object sender, RoutedEventArgs e)
         {
-            game = new Game(canvas, gameParameters);
-            game.GameOver += GameOver;
+            InitGame();
         }
 
         private void GameOver(object sender, GameOverEventArgs e)
         {
-            CoreWindow.GetForCurrentThread().KeyUp -= game.KeyUp;
+            CoreWindow.GetForCurrentThread().KeyDown -= game.OnKeyDown;
+            CoreWindow.GetForCurrentThread().KeyUp -= game.OnKeyUp;
             ForegroundGrid.Visibility = Visibility.Visible;
             stackPanelEndGame.Visibility = Visibility.Visible;
             if (e.Winner == -1)
@@ -56,14 +57,48 @@ namespace bomberman
 
         protected override void OnNavigatedFrom(NavigationEventArgs e)
         {
-            CoreWindow.GetForCurrentThread().KeyUp -= game.KeyUp;
+            CoreWindow.GetForCurrentThread().KeyDown -= game.OnKeyDown;
+            CoreWindow.GetForCurrentThread().KeyUp -= game.OnKeyUp;
         }
 
         private void StartGame_Click(object sender, RoutedEventArgs e)
+        {         
+            btnStartGame.Visibility = Visibility.Collapsed;
+            txtCountdown.Visibility = Visibility.Visible;
+            DispatcherTimer countdownTimer = new DispatcherTimer();
+            countdownTimer.Tick += CountdownTimer_Tick;
+            _countdownCount = 3;
+            txtCountdown.Text = _countdownCount.ToString();
+            countdownTimer.Interval = new TimeSpan(0, 0, 1);
+            countdownTimer.Start();
+        }
+
+        private void CountdownTimer_Tick(object sender, object e)
         {
-            CoreWindow.GetForCurrentThread().KeyUp += game.KeyUp;
+            DispatcherTimer timer = sender as DispatcherTimer;
+            switch (_countdownCount)
+            {
+                case 0:
+                    timer.Stop();
+                    StartGame();
+                    break;
+                case 1:
+                    txtCountdown.Text = "Go!";
+                    _countdownCount--;
+                    break;
+                default:
+                    _countdownCount--;
+                    txtCountdown.Text = _countdownCount.ToString();
+                    break;
+            }
+        }
+
+        private void StartGame()
+        {
+            txtCountdown.Visibility = Visibility.Visible;
             ForegroundGrid.Visibility = Visibility.Collapsed;
-            StartGame.Visibility = Visibility.Collapsed;
+            CoreWindow.GetForCurrentThread().KeyDown += game.OnKeyDown;
+            CoreWindow.GetForCurrentThread().KeyUp += game.OnKeyUp;
             game.StartGame();
         }
 
@@ -76,9 +111,28 @@ namespace bomberman
         {
             stackPanelEndGame.Visibility = Visibility.Collapsed;
             canvas.Children.Clear();
+            InitGame();
+            btnStartGame.Visibility = Visibility.Visible;
+        }
+
+        private void InitGame()
+        {
             game = new Game(canvas, gameParameters);
             game.GameOver += GameOver;
-            StartGame.Visibility = Visibility.Visible;
+            game.Paused += Game_Paused;
+            game.UnPaused += Game_UnPaused;
+        }
+
+        private void Game_UnPaused(object sender, EventArgs e)
+        {
+            ForegroundGrid.Visibility = Visibility.Collapsed;
+            txtPaused.Visibility = Visibility.Collapsed;
+        }
+
+        private void Game_Paused(object sender, EventArgs e)
+        {
+            ForegroundGrid.Visibility = Visibility.Visible;
+            txtPaused.Visibility = Visibility.Visible;
         }
     }
 }

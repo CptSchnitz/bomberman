@@ -4,9 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Windows.Foundation;
+using Windows.System;
 using Windows.UI.Core;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
+using Windows.UI.Xaml.Input;
 
 namespace bomberman
 {
@@ -14,8 +16,10 @@ namespace bomberman
     {
         Canvas _canvas;
         private Board _board;
-        HumanPlayer[] _players;
+        Player[] _players;
         DispatcherTimer _gameTimer;
+        private static int _tickInterval = 175;
+        private bool _paused;
 
 
         public Game(Canvas canvas, (ControlScheme controlScheme, string iconPath)[] HumanPlayerInfo)
@@ -23,14 +27,22 @@ namespace bomberman
             _canvas = canvas;
             _board = new Board(_canvas);
             Point[] SpawnLocations = _board.SpawnLocation;
-            _players = new HumanPlayer[HumanPlayerInfo.Length];
+            _players = new Player[SpawnLocations.Length];
+            _paused = false;
             for (int i = 0; i < _players.Length; i++)
             {
-                _players[i] = new HumanPlayer(SpawnLocations[i], HumanPlayerInfo[i].controlScheme, HumanPlayerInfo[i].iconPath, _canvas);
+                if (i < HumanPlayerInfo.Length)
+                {
+                    _players[i] = new HumanPlayer(SpawnLocations[i], HumanPlayerInfo[i].controlScheme, HumanPlayerInfo[i].iconPath, _canvas, this);
+                }
+                else
+                {
+                    _players[i] = new AiPlayer(SpawnLocations[i], canvas, "ms-appx:///Assets/PlayerIcons/thump.png", this);
+                }
                 _players[i].PlayerMovement += _board.OnPlayerMovement;
             }
             _gameTimer = new DispatcherTimer();
-            _gameTimer.Interval = new TimeSpan(0, 0, 0, 0, 250);
+            _gameTimer.Interval = new TimeSpan(0, 0, 0, 0, TickInterval);
             _gameTimer.Tick += _gameTimer_Tick;
         }
 
@@ -42,6 +54,22 @@ namespace bomberman
             }
         }
 
+        public Player[] Players
+        {
+            get
+            {
+                return _players;
+            }
+        }
+
+        public static int TickInterval
+        {
+            get
+            {
+                return _tickInterval;
+            }
+        }
+
         private void _gameTimer_Tick(object sender, object e)
         {
             if (IsGameOver(out int winner))
@@ -50,6 +78,14 @@ namespace bomberman
                 GameOverEventArgs args = new GameOverEventArgs();
                 args.Winner = winner;
                 OnGameOver(args);
+            }
+            else
+            {
+                foreach (Player player in Players)
+                {
+                    if (player.Alive)
+                        player.DoAction();
+                }
             }
         }
 
@@ -83,7 +119,7 @@ namespace bomberman
             _gameTimer.Start();
         }
 
-        public void Bomb_BombExplosion(object sender, EventArgs e)
+        public void OnBombExplosion(object sender, EventArgs e)
         {
             Bomb bomb = sender as Bomb;
             List<Tile> explodedTiles = _board.ExplodeBomb(bomb);
@@ -95,7 +131,7 @@ namespace bomberman
         {
             foreach (Tile tile in explodedTiles)
             {
-                foreach (Player player in _players)
+                foreach (Player player in Players)
                 {
                     if (_board.IsPlayerInTile(player, tile))
                         player.Hit();
@@ -103,30 +139,73 @@ namespace bomberman
             }
         }
 
-
-        public void KeyUp(CoreWindow sender, KeyEventArgs args)
+        public void OnKeyDown(CoreWindow sender, KeyEventArgs args)
         {
-
-            Windows.System.VirtualKey key = args.VirtualKey;
-            foreach (HumanPlayer humanPlayer in _players)
+            if (args.KeyStatus.RepeatCount == 1)
             {
-                if (humanPlayer.Alive && humanPlayer.ControlScheme.IsKeyInScheme(key))
-                    humanPlayer.MoveBasedOnKey(key, this);
+                Windows.System.VirtualKey key = args.VirtualKey;
+                if (!_paused)
+                {
+                    foreach (Player player in _players)
+                    {
+                        if (player is HumanPlayer humanPlayer && humanPlayer.Alive && humanPlayer.ControlScheme.IsKeyInScheme(key))
+                            humanPlayer.OnKeyDown(key);
+                    }
+
+                }
             }
-           
+        }
+
+        public void OnKeyUp(CoreWindow sender, KeyEventArgs args)
+        {
+            VirtualKey key = args.VirtualKey;
+            if (_paused && key == VirtualKey.P)
+            {
+                _gameTimer.Start();
+                OnUnPaused();
+                _paused = false;
+                return;
+            }
+            else
+            {
+                if (key == VirtualKey.P)
+                {
+                    _gameTimer.Stop();
+                    OnPaused();
+                    _paused = true;
+                    return;
+                }
+                foreach (Player player in _players)
+                {
+                    if (player is HumanPlayer humanPlayer && humanPlayer.Alive && humanPlayer.ControlScheme.IsKeyInScheme(key))
+                        humanPlayer.OnKeyUp(key);
+                }
+            }
+
         }
         protected virtual void OnGameOver(GameOverEventArgs e)
         {
             if (GameOver != null)
                 GameOver(this, e);
         }
+        protected virtual void OnPaused()
+        {
+            if (Paused != null)
+                Paused(this, EventArgs.Empty);
+        }
+        protected virtual void OnUnPaused()
+        {
+            if (UnPaused != null)
+                UnPaused(this, EventArgs.Empty);
+        }
 
         public event EventHandler<GameOverEventArgs> GameOver;
+        public event EventHandler Paused;
+        public event EventHandler UnPaused;
     }
 
     class GameOverEventArgs : EventArgs
     {
         public int Winner { get; set; }
-
     }
 }

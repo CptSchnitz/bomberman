@@ -16,17 +16,16 @@ namespace bomberman
         protected Image _image;
         private readonly int _maxBombCount = 5;
         private int _currentMaxBombCount = 1;
-        private int _currentBombCount;
-        private int _bombStr = 1;
+        protected int _currentBombCount;
+        protected int _bombStr = 1;
         protected bool _upgradeSpeedFlag = false;
         private bool _alive = true;
+        private readonly double _maxStepSize = 25;
+        private double _stepSize = 12.5;
+        protected Game _game;
+        protected Direction _currentMoveDirection = Direction.Null;
 
-        private readonly double _maxMoveSpeed = 50;
-        private readonly int _maxBombStr = 5;
-        private double _moveSpeed = 12.5;
-
-
-        protected Player(Point spawnPoint, Canvas canvas, string imageSource)
+        protected Player(Point spawnPoint, Canvas canvas, string imageSource, Game game)
         {
             _centerPoint = spawnPoint;
             _image = new Image
@@ -41,16 +40,16 @@ namespace bomberman
             canvas.Children.Add(_image);
             _image.Source = new BitmapImage(new Uri($"{imageSource}"));
             _currentBombCount = _currentMaxBombCount;
+            _game = game;
         }
 
-        public double MoveSpeed
+        public double StepSize
         {
             get
             {
-                return _moveSpeed;
+                return _stepSize;
             }
         }
-
         public int BombStr
         {
             get
@@ -58,7 +57,6 @@ namespace bomberman
                 return _bombStr;
             }
         }
-
         public bool Alive
         {
             get
@@ -66,96 +64,91 @@ namespace bomberman
                 return _alive;
             }
         }
-
-        public Point GetCenter()
+        public Point Center
         {
-            return _centerPoint;
-        }
-
-        protected void Move(KeyAction keyAction, Board board)
-        {
-            switch (keyAction)
+            get
             {
-                case KeyAction.Up:
-                    MoveUp(board);
-                    break;
-                case KeyAction.Down:
-                    MoveDown(board);
-                    break;
-                case KeyAction.Left:
-                    MoveLeft(board);
-                    break;
-                case KeyAction.Right:
-                    MoveRight(board);
-                    break;
+                return _centerPoint;
             }
         }
 
-        private void MoveLeft(Board board)
+        public virtual void DoAction()
         {
-            Point newCenter = new Point(_centerPoint.X - MoveSpeed, _centerPoint.Y);
-            if (board.IsMovePossible(newCenter, this))
+            switch (_currentMoveDirection)
             {
-                _centerPoint = newCenter;
-                Canvas.SetLeft(_image, Canvas.GetLeft(_image) - MoveSpeed);
-                UpgradeMoveSpeedIfNeeded();
-                OnPlayerMovement();
-                //board.OnPlayerMovement(this);
-            }
-        }
-        private void MoveUp(Board board)
-        {
-            Point newCenter = new Point(_centerPoint.X, _centerPoint.Y - MoveSpeed);
-            if (board.IsMovePossible(newCenter, this))
-            {
-                _centerPoint = newCenter;
-                Canvas.SetTop(_image, Canvas.GetTop(_image) - MoveSpeed);
-                UpgradeMoveSpeedIfNeeded();
-                OnPlayerMovement();
-                //board.OnPlayerMovement(this);
-            }
-        }
-        private void MoveRight(Board board)
-        {
-            Point newCenter = new Point(_centerPoint.X + MoveSpeed, _centerPoint.Y);
-            if (board.IsMovePossible(newCenter, this))
-            {
-                _centerPoint = newCenter;
-                Canvas.SetLeft(_image, Canvas.GetLeft(_image) + MoveSpeed);
-                UpgradeMoveSpeedIfNeeded();
-                OnPlayerMovement();
-                //board.OnPlayerMovement(this);
-            }
-        }
-        private void MoveDown(Board board)
-        {
-            Point newCenter = new Point(_centerPoint.X, _centerPoint.Y + MoveSpeed);
-            if (board.IsMovePossible(newCenter, this))
-            {
-                _centerPoint = newCenter;
-                Canvas.SetTop(_image, Canvas.GetTop(_image) + MoveSpeed);
-                UpgradeMoveSpeedIfNeeded();
-                OnPlayerMovement();
-                //board.OnPlayerMovement(this);
+                case Direction.Up:
+                    MoveUp();
+                    break;
+                case Direction.Down:
+                    MoveDown();
+                    break;
+                case Direction.Left:
+                    MoveLeft();
+                    break;
+                case Direction.Right:
+                    MoveRight();
+                    break;
             }
         }
 
-        public bool DropBomb(Board board, out Bomb bomb)
+        private void MoveLeft()
         {
-            bomb = null;
-            if (_currentBombCount > 0 && board.PlaceBomb(this, BombStr, out bomb))
+            Point newCenter = new Point(_centerPoint.X - StepSize, _centerPoint.Y);
+            if (_game.Board.IsMovePossible(newCenter, this))
+            {
+                _centerPoint = newCenter;
+                Canvas.SetLeft(_image, Canvas.GetLeft(_image) - StepSize);
+                UpgradeMoveSpeedIfNeeded();
+                OnPlayerMovement();
+            }
+        }
+        private void MoveUp()
+        {
+            Point newCenter = new Point(_centerPoint.X, _centerPoint.Y - StepSize);
+            if (_game.Board.IsMovePossible(newCenter, this))
+            {
+                _centerPoint = newCenter;
+                Canvas.SetTop(_image, Canvas.GetTop(_image) - StepSize);
+                UpgradeMoveSpeedIfNeeded();
+                OnPlayerMovement();
+            }
+        }
+        private void MoveRight()
+        {
+            Point newCenter = new Point(_centerPoint.X + StepSize, _centerPoint.Y);
+            if (_game.Board.IsMovePossible(newCenter, this))
+            {
+                _centerPoint = newCenter;
+                Canvas.SetLeft(_image, Canvas.GetLeft(_image) + StepSize);
+                UpgradeMoveSpeedIfNeeded();
+                OnPlayerMovement();
+            }
+        }
+        private void MoveDown()
+        {
+            Point newCenter = new Point(_centerPoint.X, _centerPoint.Y + StepSize);
+            if (_game.Board.IsMovePossible(newCenter, this))
+            {
+                _centerPoint = newCenter;
+                Canvas.SetTop(_image, Canvas.GetTop(_image) + StepSize);
+                UpgradeMoveSpeedIfNeeded();
+                OnPlayerMovement();
+            }
+        }
+
+        public bool DropBomb()
+        {
+            if (_currentBombCount > 0 && _game.Board.PlaceBomb(this, BombStr, _game))
             {
                 _currentBombCount--;
                 return true;
             }
             return false;
         }
-
         public void GiveBomb()
         {
             _currentBombCount++;
         }
-
         public void UpgradeBombCount()
         {
             if (_currentMaxBombCount < _maxBombCount)
@@ -164,31 +157,27 @@ namespace bomberman
                 _currentMaxBombCount += 1;
             }
         }
-
         public void UpgradeBombStrength()
         {
-            if (_bombStr < _maxBombStr)
+            if (_bombStr < Bomb.MaxStrength)
                 _bombStr += 1;
         }
-
         public void UpgradeMoveSpeed()
         {
-            if (_moveSpeed < _maxMoveSpeed)
+            if (_stepSize < _maxStepSize)
             {
                 _upgradeSpeedFlag = true;
             }
 
         }
-
         protected void UpgradeMoveSpeedIfNeeded()
         {
             if (_upgradeSpeedFlag)
             {
-                _moveSpeed *= 2;
+                _stepSize *= 2;
                 _upgradeSpeedFlag = false;
             }
         }
-
         public void Hit()
         {
             _image.Visibility = Visibility.Collapsed;
@@ -200,7 +189,6 @@ namespace bomberman
             if (PlayerMovement != null)
                 PlayerMovement(this, EventArgs.Empty);
         }
-
         public event EventHandler PlayerMovement;
     }
 }

@@ -8,10 +8,11 @@ namespace bomberman
 {
     enum Direction
     {
-        Null,
+        
         Up,
         Down,
         Left,
-        Right
+        Right,
+        Null
     }
 }

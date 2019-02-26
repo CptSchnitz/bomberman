@@ -11,7 +11,11 @@ namespace bomberman
     class HumanPlayer : Player
     {
         ControlScheme _controlScheme;
-        public HumanPlayer(Point spawnPoint,ControlScheme controlScheme, string iconPath, Canvas canvas) : base(spawnPoint, canvas, iconPath)
+        
+        bool _resetDirectionFlag = false;
+        bool _firstMove = false;
+
+        public HumanPlayer(Point spawnPoint, ControlScheme controlScheme, string iconPath, Canvas canvas, Game game) : base(spawnPoint, canvas, iconPath, game)
         {
             _controlScheme = controlScheme;
         }
@@ -24,13 +28,59 @@ namespace bomberman
             }
         }
 
-        public void MoveBasedOnKey(Windows.System.VirtualKey virtualKey, Game game)
+        public void OnKeyDown(Windows.System.VirtualKey virtualKey)
         {
             KeyAction keyAction = _controlScheme.GetAction(virtualKey);
-            if (keyAction == KeyAction.PlaceBomb && DropBomb(game.Board, out Bomb bomb))
-                bomb.BombExplosion += game.Bomb_BombExplosion;
-            Move(keyAction, game.Board);
+            if (keyAction == KeyAction.PlaceBomb)
+            {
+                DropBomb();
+                return;
+            }
+            Direction direction = KeyActionToDirection(keyAction);
+            _currentMoveDirection = KeyActionToDirection(keyAction);
+            _firstMove = true;
+            
+        }
 
+        public void OnKeyUp(Windows.System.VirtualKey virtualKey)
+        {
+            KeyAction keyAction = _controlScheme.GetAction(virtualKey);
+            if (KeyActionToDirection(keyAction) == _currentMoveDirection)
+                _resetDirectionFlag = true;
+        }
+
+        public override void DoAction()
+        {
+            if (!_firstMove && _resetDirectionFlag)
+            {
+                _currentMoveDirection = Direction.Null;
+                _resetDirectionFlag = false;
+            }
+            _firstMove = false;
+            base.DoAction();
+        }
+
+
+
+        private static Direction KeyActionToDirection(KeyAction keyAction)
+        {
+            Direction direction = Direction.Null;
+            switch (keyAction)
+            {
+                case KeyAction.Up:
+                    direction = Direction.Up;
+                    break;
+                case KeyAction.Down:
+                    direction = Direction.Down;
+                    break;
+                case KeyAction.Left:
+                    direction = Direction.Left;
+                    break;
+                case KeyAction.Right:
+                    direction = Direction.Right;
+                    break;
+            }
+            return direction;
         }
     }
 }
