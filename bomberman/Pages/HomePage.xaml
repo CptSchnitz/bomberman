@@ -7,8 +7,18 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    <Page.Resources>
+        <Style TargetType="TextBox">
+            <Setter Property="Margin" Value="5"/>
+        </Style>
+    </Page.Resources>
 
     <Grid>
-        <TextBlock Text="HOME"/>
+        <StackPanel Padding="5">
+            <TextBlock Text="Welcome to the game Bomber Man."/>
+            <TextBlock Text='To play a game click the "New Game" tab.'/>
+            <TextBlock Text='For help about how to play the game Click the "help" tab.' />
+            <TextBlock Text='For the controls, go to the "Controls" tab.'/>
+        </StackPanel>
     </Grid>
 </Page>

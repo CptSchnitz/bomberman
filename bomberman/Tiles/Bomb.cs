@@ -66,6 +66,10 @@ namespace bomberman
                 return _tickInterval;
             }
         }
+        public override bool IsPassable(Player player)
+        {
+            return ReferenceEquals(_owner, player) && !_ownerLeftBombTile;
+        }
 
         private void _owner_PlayerMovement(object sender, EventArgs e)
         {
@@ -119,10 +123,6 @@ namespace bomberman
             _game.UnPaused -= _game_UnPaused;
         }
 
-        public override bool IsPassable(Player player)
-        {
-            return ReferenceEquals(_owner, player) && !_ownerLeftBombTile;
-        }
 
         protected virtual void OnBombExplosion()
         {

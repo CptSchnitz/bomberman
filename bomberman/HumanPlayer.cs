@@ -10,8 +10,7 @@ namespace bomberman
 {
     class HumanPlayer : Player
     {
-        ControlScheme _controlScheme;
-        
+        ControlScheme _controlScheme;       
         bool _resetDirectionFlag = false;
         bool _firstMove = false;
 
@@ -28,27 +27,6 @@ namespace bomberman
             }
         }
 
-        public void OnKeyDown(Windows.System.VirtualKey virtualKey)
-        {
-            KeyAction keyAction = _controlScheme.GetAction(virtualKey);
-            if (keyAction == KeyAction.PlaceBomb)
-            {
-                DropBomb();
-                return;
-            }
-            Direction direction = KeyActionToDirection(keyAction);
-            _currentMoveDirection = KeyActionToDirection(keyAction);
-            _firstMove = true;
-            
-        }
-
-        public void OnKeyUp(Windows.System.VirtualKey virtualKey)
-        {
-            KeyAction keyAction = _controlScheme.GetAction(virtualKey);
-            if (KeyActionToDirection(keyAction) == _currentMoveDirection)
-                _resetDirectionFlag = true;
-        }
-
         public override void DoAction()
         {
             if (!_firstMove && _resetDirectionFlag)
@@ -60,8 +38,25 @@ namespace bomberman
             base.DoAction();
         }
 
+        public void OnKeyDown(Windows.System.VirtualKey virtualKey)
+        {
+            KeyAction keyAction = _controlScheme.GetAction(virtualKey);
+            if (keyAction == KeyAction.PlaceBomb)
+            {
+                DropBomb();
+                return;
+            }
+            Direction direction = KeyActionToDirection(keyAction);
+            _currentMoveDirection = KeyActionToDirection(keyAction);
+            _firstMove = true;
 
-
+        }
+        public void OnKeyUp(Windows.System.VirtualKey virtualKey)
+        {
+            KeyAction keyAction = _controlScheme.GetAction(virtualKey);
+            if (KeyActionToDirection(keyAction) == _currentMoveDirection)
+                _resetDirectionFlag = true;
+        }
         private static Direction KeyActionToDirection(KeyAction keyAction)
         {
             Direction direction = Direction.Null;

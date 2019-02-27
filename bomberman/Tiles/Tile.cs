@@ -31,21 +31,26 @@ namespace bomberman
             }
         }
 
-        public virtual bool IsDestructable()
+        public virtual bool Destructable
         {
-            return false;
+            get
+            {
+                return false;
+            }
+        }
+
+        public virtual bool IsBlocksExplosion
+        {
+            get
+            {
+                return false;
+            }
         }
 
         public virtual bool IsPassable(Player player)
         {
             return true;
         }
-
-        public virtual bool IsBlocksExplosion()
-        {
-            return false;
-        }
-
 
     }
 }

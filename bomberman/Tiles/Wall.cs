@@ -9,7 +9,7 @@ namespace bomberman
 {
     class Wall : Tile
     {
-        public Wall(Image image) : base (image, "Assets/wall1.jpg")
+        public Wall(Image image) : base (image, "Assets/wall.png")
         {
             
         }
@@ -19,9 +19,6 @@ namespace bomberman
             return false;
         }
 
-        public override bool IsBlocksExplosion()
-        {
-            return true;
-        }
+        public override bool IsBlocksExplosion => true;
     }
 }

@@ -125,6 +125,9 @@
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
     <Compile Include="Board.cs" />
+    <Compile Include="Pages\ControlsPage.xaml.cs">
+      <DependentUpon>ControlsPage.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Tiles\Bomb.cs" />
     <Compile Include="Tiles\BombCountPowerUp.cs" />
     <Compile Include="Tiles\BombStrPowerUp.cs" />
@@ -171,6 +174,23 @@
     <Content Include="Assets\crate.png" />
     <Content Include="Assets\ExplodingBomb.png" />
     <Content Include="Assets\explosion.png" />
+    <Content Include="Assets\KeyIcons\Keyboard_Black_A.png" />
+    <Content Include="Assets\KeyIcons\Keyboard_Black_Arrow_Down.png" />
+    <Content Include="Assets\KeyIcons\Keyboard_Black_Arrow_Left.png" />
+    <Content Include="Assets\KeyIcons\Keyboard_Black_Arrow_Right.png" />
+    <Content Include="Assets\KeyIcons\Keyboard_Black_Arrow_Up.png" />
+    <Content Include="Assets\KeyIcons\Keyboard_Black_B.png" />
+    <Content Include="Assets\KeyIcons\Keyboard_Black_D.png" />
+    <Content Include="Assets\KeyIcons\Keyboard_Black_Enter.png" />
+    <Content Include="Assets\KeyIcons\Keyboard_Black_P.png" />
+    <Content Include="Assets\KeyIcons\Keyboard_Black_S.png" />
+    <Content Include="Assets\KeyIcons\Keyboard_Black_Space.png" />
+    <Content Include="Assets\KeyIcons\Keyboard_Black_W.png" />
+    <Content Include="Assets\KeyIcons\XboxOne_A.png" />
+    <Content Include="Assets\KeyIcons\XboxOne_Dpad_Down.png" />
+    <Content Include="Assets\KeyIcons\XboxOne_Dpad_Left.png" />
+    <Content Include="Assets\KeyIcons\XboxOne_Dpad_Right.png" />
+    <Content Include="Assets\KeyIcons\XboxOne_Dpad_Up.png" />
     <Content Include="Assets\LargeBomb.png" />
     <Content Include="Assets\PlayerIcons\Angry.png" />
     <Content Include="Assets\PlayerIcons\derp.png" />
@@ -180,9 +200,9 @@
     <Content Include="Assets\PlayerIcons\Obese.png" />
     <Content Include="Assets\PlayerIcons\Ree.png" />
     <Content Include="Assets\PlayerIcons\thump.png" />
-    <Content Include="Assets\redcatface.png" />
     <Content Include="Assets\SmallBomb.png" />
     <Content Include="Assets\SpeedUpgrade.png" />
+    <Content Include="Assets\wall.png" />
     <Content Include="Assets\wall1.jpg" />
     <Content Include="Properties\Default.rd.xml" />
     <Content Include="Assets\LockScreenLogo.scale-200.png" />
@@ -199,6 +219,10 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Page Include="Pages\AboutPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Pages\ControlsPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

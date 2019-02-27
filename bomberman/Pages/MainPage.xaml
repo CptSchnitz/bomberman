@@ -25,6 +25,9 @@
                     <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="&#xE9CE;" />
                 </NavigationViewItem.Icon>
             </NavigationViewItem>
+            <NavigationViewItem Icon="Setting">
+                <TextBlock Text="Controls"  Tag="Nav_Controls"/>
+            </NavigationViewItem>
             <NavigationViewItem>
                 <TextBlock Text="About" Tag="Nav_About"/>
                 <NavigationViewItem.Icon>

@@ -54,6 +54,10 @@ namespace bomberman
                         ContentFrame.Navigate(typeof(HelpPage));
                         SetNavViewHeader("Help");
                         break;
+                    case "Nav_Controls":
+                        ContentFrame.Navigate(typeof(ControlsPage));
+                        SetNavViewHeader("Controls");
+                        break;
                     case "Nav_About":
                         ContentFrame.Navigate(typeof(AboutPage));
                         SetNavViewHeader("About");

@@ -209,7 +209,7 @@ namespace bomberman
         private List<Tile> ExplodeUp(int row, int column, int bombStr)
         {
             List<Tile> BombAOE = new List<Tile>();
-            while (row >= 0 && !_board[row, column].IsBlocksExplosion() && bombStr > 0)
+            while (row >= 0 && !_board[row, column].IsBlocksExplosion&& bombStr > 0)
             {
                 if (HandleSpecialTileCasesInExplosion(row, column, BombAOE, Direction.Down))
                 {
@@ -227,7 +227,7 @@ namespace bomberman
         private List<Tile> ExplodeDown(int row, int column, int bombStr)
         {
             List<Tile> BombAOE = new List<Tile>();
-            while (row < _board.GetLength(0) && !_board[row, column].IsBlocksExplosion() && bombStr > 0)
+            while (row < _board.GetLength(0) && !_board[row, column].IsBlocksExplosion&& bombStr > 0)
             {
                 if (HandleSpecialTileCasesInExplosion(row, column, BombAOE, Direction.Up))
                 {
@@ -245,7 +245,7 @@ namespace bomberman
         private List<Tile> ExplodeLeft(int row, int column, int bombStr)
         {
             List<Tile> BombAOE = new List<Tile>();
-            while (column >= 0 && !_board[row, column].IsBlocksExplosion() && bombStr > 0)
+            while (column >= 0 && !_board[row, column].IsBlocksExplosion&& bombStr > 0)
             {
                 if (HandleSpecialTileCasesInExplosion(row, column, BombAOE, Direction.Right))
                 {
@@ -264,7 +264,7 @@ namespace bomberman
         private List<Tile> ExplodeRight(int row, int column, int bombStr)
         {
             List<Tile> BombAOE = new List<Tile>();
-            while (column < _board.GetLength(1) && !_board[row, column].IsBlocksExplosion() && bombStr > 0)
+            while (column < _board.GetLength(1) && !_board[row, column].IsBlocksExplosion&& bombStr > 0)
             {
                 if (HandleSpecialTileCasesInExplosion(row, column, BombAOE, Direction.Left))
                 {
@@ -306,7 +306,7 @@ namespace bomberman
                 }
                 flag = true;
             }
-            else if (_board[row, column].IsDestructable())
+            else if (_board[row, column].Destructable)
             {
                 flag = false;
             }
@@ -386,7 +386,7 @@ namespace bomberman
         private bool IsTileSafeHelper(int row, int col, int distanceFromTile, out bool isTileSafe)
         {
             isTileSafe = true;
-            if (_board[row, col] is Crate || _board[row, col].IsBlocksExplosion())
+            if (_board[row, col] is Crate || _board[row, col].IsBlocksExplosion)
             {
                 isTileSafe = true;
                 return true;

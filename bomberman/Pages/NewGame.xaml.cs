@@ -25,9 +25,7 @@ namespace bomberman
     /// </summary>
     public sealed partial class NewGame : Page
     {
-        string[] _playerIconsPath = { "ms-appx:///Assets/PlayerIcons/Angry.png", "ms-appx:///Assets/PlayerIcons/derp.png",
-            "ms-appx:///Assets/PlayerIcons/Drool.png", "ms-appx:///Assets/PlayerIcons/Fr.png", "ms-appx:///Assets/PlayerIcons/Great.png",
-            "ms-appx:///Assets/PlayerIcons/Obese.png", "ms-appx:///Assets/PlayerIcons/Ree.png", "ms-appx:///Assets/PlayerIcons/thump.png"};
+        string[] _playerIconsPath = Game.PlayerIconsPath;
         string[] _controlSchemes = { "Arrows", "WASD","Gamepad"};
         Selector[] _gridViews;
         Selector[] _comboBoxes;
@@ -105,10 +103,10 @@ namespace bomberman
 
         private void BtnStartGame_Click(object sender, RoutedEventArgs e)
         {
-            (ControlScheme controlScheme, string iconPath)[] parameters = 
+            (ControlScheme controlScheme, string iconPath)[] playerList = 
                 new (ControlScheme controlScheme, string iconPath)[comboBoxNumOfPlayers.SelectedIndex+1];
 
-            for (int i = 0; i < parameters.Length; i++)
+            for (int i = 0; i < playerList.Length; i++)
             {
                 ControlScheme scheme = null;
                 switch(_comboBoxes[i].SelectedIndex)
@@ -124,13 +122,30 @@ namespace bomberman
                         break;
 
                 }
-                parameters[i] = (scheme, _gridViews[i].SelectedValue.ToString());
+                playerList[i] = (scheme, _gridViews[i].SelectedValue.ToString());
             }
+            ((ControlScheme controlScheme, string iconPath)[] playerList, bool botsEnabled) parameters = (playerList, switchBots.IsOn);
 
             NavigationView navView = Frame.Parent as NavigationView;
             Page page = navView.Parent as MainPage;
             Frame frame = page.Parent as Frame;
             frame.Navigate(typeof(GamePage), parameters);
+        }
+
+        private void SwitchBots_Toggled(object sender, RoutedEventArgs e)
+        {
+            ToggleSwitch toggleSwitch = sender as ToggleSwitch;
+            if (toggleSwitch != null)
+            {
+                ComboBoxItem item = comboBoxNumOfPlayers.Items[0] as ComboBoxItem;
+                if (toggleSwitch.IsOn == true)
+                    item.IsEnabled = true;
+                else
+                {
+                    item.IsEnabled = false;
+                    comboBoxNumOfPlayers.SelectedIndex = 1;
+                }
+            }
         }
     }
 }

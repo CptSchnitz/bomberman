@@ -12,6 +12,7 @@ using Windows.UI.Xaml.Controls.Primitives;
 using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
+using Windows.UI.Xaml.Media.Imaging;
 using Windows.UI.Xaml.Navigation;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=234238
@@ -24,7 +25,7 @@ namespace bomberman
     public sealed partial class GamePage : Page
     {
         Game game;
-        (ControlScheme controlScheme, string iconPath)[] gameParameters;
+        ((ControlScheme controlScheme, string iconPath)[] playerList, bool botsEnabled) gameParameters;
         int _countdownCount;
         public GamePage()
         {
@@ -34,7 +35,7 @@ namespace bomberman
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
-            gameParameters = ((ControlScheme controlScheme, string iconPath)[])e.Parameter;
+            gameParameters = (((ControlScheme controlScheme, string iconPath)[] playerList, bool botsEnabled))e.Parameter;
             base.OnNavigatedTo(e);
         }
         private void MainPage_Loaded(object sender, RoutedEventArgs e)
@@ -49,9 +50,13 @@ namespace bomberman
             ForegroundGrid.Visibility = Visibility.Visible;
             stackPanelEndGame.Visibility = Visibility.Visible;
             if (e.Winner == -1)
-                txtWinner.Text = "Draw";
+                txtWinner.Text = "Game Over";
             else
-                txtWinner.Text = $"Player {(e.Winner + 1).ToString()} Won";
+            {
+                imgWinner.Visibility = Visibility.Visible;
+                imgWinner.Source = new BitmapImage(new Uri(gameParameters.playerList[e.Winner].iconPath));
+                txtWinner.Text = "Is the winner";
+            }
             game.GameOver -= GameOver;
         }
 
@@ -81,6 +86,7 @@ namespace bomberman
                 case 0:
                     timer.Stop();
                     StartGame();
+                    txtCountdown.Visibility = Visibility.Collapsed;
                     break;
                 case 1:
                     txtCountdown.Text = "Go!";
@@ -109,6 +115,7 @@ namespace bomberman
 
         private void BtnRestart_Click(object sender, RoutedEventArgs e)
         {
+            imgWinner.Visibility = Visibility.Collapsed;
             stackPanelEndGame.Visibility = Visibility.Collapsed;
             canvas.Children.Clear();
             InitGame();
@@ -117,7 +124,7 @@ namespace bomberman
 
         private void InitGame()
         {
-            game = new Game(canvas, gameParameters);
+            game = new Game(canvas, gameParameters.playerList, gameParameters.botsEnabled);
             game.GameOver += GameOver;
             game.Paused += Game_Paused;
             game.UnPaused += Game_UnPaused;

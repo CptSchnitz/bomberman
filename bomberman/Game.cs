@@ -21,23 +21,28 @@ namespace bomberman
         private static int _tickInterval = 175;
         private bool _paused;
 
-
-        public Game(Canvas canvas, (ControlScheme controlScheme, string iconPath)[] HumanPlayerInfo)
+        public Game(Canvas canvas, (ControlScheme controlScheme, string iconPath)[] HumanPlayerInfo, bool botsEnabled)
         {
             _canvas = canvas;
             _board = new Board(_canvas);
             Point[] SpawnLocations = _board.SpawnLocation;
-            _players = new Player[SpawnLocations.Length];
+            if (botsEnabled)
+                _players = new Player[SpawnLocations.Length];
+            else
+                _players = new Player[HumanPlayerInfo.Length];
+            List<string> botIconsList = new List<string>(PlayerIconsPath);
+            int botIconIndex = 0;
             _paused = false;
             for (int i = 0; i < _players.Length; i++)
             {
                 if (i < HumanPlayerInfo.Length)
                 {
                     _players[i] = new HumanPlayer(SpawnLocations[i], HumanPlayerInfo[i].controlScheme, HumanPlayerInfo[i].iconPath, _canvas, this);
+                    botIconsList.Remove(HumanPlayerInfo[i].iconPath);
                 }
                 else
                 {
-                    _players[i] = new AiPlayer(SpawnLocations[i], canvas, "ms-appx:///Assets/PlayerIcons/thump.png", this);
+                    _players[i] = new AiPlayer(SpawnLocations[i], canvas, botIconsList[botIconIndex++], this);
                 }
                 _players[i].PlayerMovement += _board.OnPlayerMovement;
             }
@@ -70,6 +75,10 @@ namespace bomberman
             }
         }
 
+        public static string[] PlayerIconsPath { get; } = { "ms-appx:///Assets/PlayerIcons/Angry.png", "ms-appx:///Assets/PlayerIcons/derp.png",
+            "ms-appx:///Assets/PlayerIcons/Drool.png", "ms-appx:///Assets/PlayerIcons/Fr.png", "ms-appx:///Assets/PlayerIcons/Great.png",
+            "ms-appx:///Assets/PlayerIcons/Obese.png", "ms-appx:///Assets/PlayerIcons/Ree.png", "ms-appx:///Assets/PlayerIcons/thump.png" };
+
         private void _gameTimer_Tick(object sender, object e)
         {
             if (IsGameOver(out int winner))
@@ -91,27 +100,27 @@ namespace bomberman
 
         private bool IsGameOver(out int winner)
         {
-            int playersAlive = _players.Length;
+            int playersAlive = 0;
+            int botsAlive = 0;
             winner = -1;
             for (int i = 0; i < _players.Length; i++)
             {
-                Player player = _players[i];
-                if (!player.Alive)
-                    playersAlive--;
-                else
-                    winner = i;
+                if (_players[i].Alive)
+                {
+                    if (_players[i] is HumanPlayer)
+                    {
+                        winner = i;
+                        if (++playersAlive > 1)
+                            return false;
+                    }
+                    else
+                        botsAlive++;
+                }
             }
 
-            switch (playersAlive)
-            {
-                case 0:
-                case 1:
-                    return true;
-                default:
-                    winner = -1;
-                    return false;
-            }
-
+            if (playersAlive == 0 || botsAlive == 0)
+                return true;
+            return false;
         }
 
         public void StartGame()

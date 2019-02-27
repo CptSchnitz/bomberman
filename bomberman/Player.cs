@@ -184,7 +184,7 @@ namespace bomberman
             _alive = false;
         }
 
-        protected virtual void OnPlayerMovement()
+        protected void OnPlayerMovement()
         {
             if (PlayerMovement != null)
                 PlayerMovement(this, EventArgs.Empty);

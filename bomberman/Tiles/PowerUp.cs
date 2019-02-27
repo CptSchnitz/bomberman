@@ -19,9 +19,12 @@ namespace bomberman
 
         }
 
-        public override bool IsDestructable()
+        public override bool Destructable
         {
-            return true;
+            get
+            {
+                return true;
+            }
         }
     }
 }

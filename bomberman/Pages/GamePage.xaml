@@ -7,8 +7,9 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    
     <Grid>
-        <Canvas x:Name="canvas" Height="750" Width="850" Background="DarkOliveGreen"/>
+        <Canvas x:Name="canvas" Height="750" Width="850" Background="#FF5C8319"/>
         <Grid x:Name="ForegroundGrid" Height="750" Width="850">
             <Grid.RowDefinitions>
                 <RowDefinition Height="2*"/>
@@ -29,8 +30,11 @@
             <TextBlock x:Name="txtCountdown" Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center" Visibility="Collapsed"/>
             <TextBlock x:Name="txtPaused" Text="Paused" Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center" Visibility="Collapsed"/>
             <StackPanel x:Name="stackPanelEndGame" Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center" Visibility="Collapsed">
-                <TextBlock x:Name="txtWinner" HorizontalAlignment="Center" Margin="0,0,0,10"/>
                 <StackPanel Orientation="Horizontal">
+                    <Image x:Name="imgWinner" Height="25" Width="25" Visibility="Collapsed" Margin="0,0,5,10"/>
+                    <TextBlock x:Name="txtWinner" HorizontalAlignment="Center" Margin="0,0,0,10"/>
+                </StackPanel>
+                    <StackPanel Orientation="Horizontal">
                     <Button x:Name="btnToMainPage" Content="Home Page" Click="BtnToMainPage_Click" Margin="0,0,10,0"/>
                     <Button x:Name="btnRestart" Content="Restart" Click="BtnRestart_Click"/>
                 </StackPanel>
