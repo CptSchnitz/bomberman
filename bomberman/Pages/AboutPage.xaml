@@ -9,6 +9,10 @@
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
     <Grid>
-        <TextBlock Text="ABOUT"/>
+        <StackPanel>
+            <TextBlock Margin="5" Text="This App was designed and written by Ofer Adelstein."/>
+            <TextBlock Margin="5" Text="The source code is available at:"/>
+            <TextBlock Margin="5"><Hyperlink NavigateUri="https://github.com/CptSchnitz/bomberman">https://github.com/CptSchnitz/bomberman</Hyperlink></TextBlock>
+        </StackPanel>
     </Grid>
 </Page>

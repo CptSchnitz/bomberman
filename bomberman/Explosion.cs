@@ -16,7 +16,6 @@ namespace bomberman
         int _explosionTimeMiliSec = 500;
         DispatcherTimer _timer;
 
-
         public Explosion(List<Tile> explodedTiles, Canvas canvas)
         {
             _canvas = canvas;
@@ -25,8 +24,8 @@ namespace bomberman
             {
                 Image image = new Image
                 {
-                    Height = 50,
-                    Width = 50,
+                    Height = Game.TileSize,
+                    Width = Game.TileSize,
                     HorizontalAlignment = HorizontalAlignment.Stretch,
                     VerticalAlignment = VerticalAlignment.Stretch,
                     Source = new BitmapImage(new Uri("ms-appx:///Assets/explosion.png"))
@@ -44,7 +43,6 @@ namespace bomberman
             _timer.Start();
         }
         
-
         private void Timer_Tick(object sender, object e)
         {
             UIElementCollection canvasChildrens = _canvas.Children;

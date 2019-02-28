@@ -14,11 +14,11 @@ namespace bomberman
 {
     class Game
     {
-        Canvas _canvas;
+        private Canvas _canvas;
         private Board _board;
         Player[] _players;
-        DispatcherTimer _gameTimer;
-        private static int _tickInterval = 175;
+        private DispatcherTimer _gameTimer;
+        private static int _tickInterval = 150;
         private bool _paused;
 
         public Game(Canvas canvas, (ControlScheme controlScheme, string iconPath)[] HumanPlayerInfo, bool botsEnabled)
@@ -48,7 +48,7 @@ namespace bomberman
             }
             _gameTimer = new DispatcherTimer();
             _gameTimer.Interval = new TimeSpan(0, 0, 0, 0, TickInterval);
-            _gameTimer.Tick += _gameTimer_Tick;
+            _gameTimer.Tick += GameTimer_Tick;
         }
 
         public Board Board
@@ -58,7 +58,6 @@ namespace bomberman
                 return _board;
             }
         }
-
         public Player[] Players
         {
             get
@@ -66,7 +65,6 @@ namespace bomberman
                 return _players;
             }
         }
-
         public static int TickInterval
         {
             get
@@ -74,12 +72,12 @@ namespace bomberman
                 return _tickInterval;
             }
         }
-
         public static string[] PlayerIconsPath { get; } = { "ms-appx:///Assets/PlayerIcons/Angry.png", "ms-appx:///Assets/PlayerIcons/derp.png",
             "ms-appx:///Assets/PlayerIcons/Drool.png", "ms-appx:///Assets/PlayerIcons/Fr.png", "ms-appx:///Assets/PlayerIcons/Great.png",
             "ms-appx:///Assets/PlayerIcons/Obese.png", "ms-appx:///Assets/PlayerIcons/Ree.png", "ms-appx:///Assets/PlayerIcons/thump.png" };
-
-        private void _gameTimer_Tick(object sender, object e)
+        public static int PlayerSize { get; } = 50;
+        public static int TileSize { get; } = 50;
+        private void GameTimer_Tick(object sender, object e)
         {
             if (IsGameOver(out int winner))
             {

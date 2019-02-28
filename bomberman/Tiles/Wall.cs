@@ -19,6 +19,6 @@ namespace bomberman
             return false;
         }
 
-        public override bool IsBlocksExplosion => true;
+        public override bool BlocksExplosion => true;
     }
 }

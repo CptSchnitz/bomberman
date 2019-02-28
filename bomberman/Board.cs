@@ -15,14 +15,15 @@ namespace bomberman
         Random _random;
         public Point MaxCoordinates { get; }
         private int _numOfCrates;
+        private int _numOfRows = 15;
+        private int _numOfColumns = 17;
 
         public Board(Canvas canvas)
         {
             _random = new Random();
             _numOfCrates = 0;
-            // fix next two lines (use fields mb)
-            _board = new Tile[15, 17];
-            MaxCoordinates = new Point(_board.GetLength(1) * 50, _board.GetLength(0) * 50);
+            _board = new Tile[_numOfRows, _numOfColumns];
+            MaxCoordinates = new Point(_board.GetLength(1) * Game.TileSize, _board.GetLength(0) * Game.TileSize);
 
             for (int i = 0; i < _board.GetLength(0); i++)
             {
@@ -30,18 +31,16 @@ namespace bomberman
                 {
                     Image image = new Image
                     {
-                        Height = 50,
-                        Width = 50,
+                        Height = Game.TileSize,
+                        Width = Game.TileSize,
                         HorizontalAlignment = HorizontalAlignment.Stretch,
                         VerticalAlignment = VerticalAlignment.Stretch,
                     };
-                    Canvas.SetTop(image, i * 50);
-                    Canvas.SetLeft(image, j * 50);
+                    Canvas.SetTop(image, i * Game.TileSize);
+                    Canvas.SetLeft(image, j * Game.TileSize);
                     Canvas.SetZIndex(image, 1);
                     canvas.Children.Add(image);
-
                     Tile tile = new Crate(image);
-
                     if (i % 2 != 0 && j % 2 != 0)
                     {
                         tile = new Wall(image);
@@ -55,7 +54,6 @@ namespace bomberman
                     {
                         _numOfCrates++;
                     }
-
                     _board[i, j] = tile;
                 }
             }
@@ -86,8 +84,8 @@ namespace bomberman
 
         public bool PlaceBomb(Player bombOwner, int bombStr, Game game)
         {
-            int column = (int)bombOwner.Center.X / 50;
-            int row = (int)bombOwner.Center.Y / 50;
+            int column = (int)bombOwner.Center.X / Game.TileSize;
+            int row = (int)bombOwner.Center.Y / Game.TileSize;
 
             foreach (Player player in game.Players)
             {
@@ -121,7 +119,8 @@ namespace bomberman
         public bool IsMovePossible(Point CenterPoint, Player player)
         {
             // out of bounds check
-            if (CenterPoint.Y - 25 < 0 || CenterPoint.X - 25 < 0 || CenterPoint.Y + 25 > MaxCoordinates.Y || CenterPoint.X + 25 > MaxCoordinates.X)
+            if (CenterPoint.Y - Game.PlayerSize / 2 < 0 || CenterPoint.X - Game.PlayerSize / 2 < 0 ||
+                CenterPoint.Y + Game.PlayerSize / 2 > MaxCoordinates.Y || CenterPoint.X + Game.PlayerSize / 2 > MaxCoordinates.X)
                 return false;
 
             List<Tile> corners = GetUniqueCornerTilesFromCenterPoint(CenterPoint);
@@ -142,19 +141,20 @@ namespace bomberman
 
         public List<Tile> GetUniqueCornerTilesFromCenterPoint(Point point)
         {
+            int distanceToPlayerEdge = Game.PlayerSize / 2 - 1;
             List<Tile> corners = new List<Tile>();
-            Tile tile = _board[((int)point.Y - 24) / 50, ((int)point.X - 24) / 50];
+            Tile tile = _board[((int)point.Y - distanceToPlayerEdge) / Game.TileSize, ((int)point.X - distanceToPlayerEdge) / Game.TileSize];
             corners.Add(tile);
 
-            tile = _board[((int)point.Y + 24) / 50, ((int)point.X - 24) / 50];
+            tile = _board[((int)point.Y + distanceToPlayerEdge) / Game.TileSize, ((int)point.X - distanceToPlayerEdge) / Game.TileSize];
             if (!corners.Contains(tile))
                 corners.Add(tile);
 
-            tile = _board[((int)point.Y - 24) / 50, ((int)point.X + 24) / 50];
+            tile = _board[((int)point.Y - distanceToPlayerEdge) / Game.TileSize, ((int)point.X + distanceToPlayerEdge) / Game.TileSize];
             if (!corners.Contains(tile))
                 corners.Add(tile);
 
-            tile = _board[((int)point.Y + 24) / 50, ((int)point.X + 24) / 50];
+            tile = _board[((int)point.Y + distanceToPlayerEdge) / Game.TileSize, ((int)point.X + distanceToPlayerEdge) / Game.TileSize];
             if (!corners.Contains(tile))
                 corners.Add(tile);
 
@@ -209,7 +209,7 @@ namespace bomberman
         private List<Tile> ExplodeUp(int row, int column, int bombStr)
         {
             List<Tile> BombAOE = new List<Tile>();
-            while (row >= 0 && !_board[row, column].IsBlocksExplosion&& bombStr > 0)
+            while (row >= 0 && !_board[row, column].BlocksExplosion && bombStr > 0)
             {
                 if (HandleSpecialTileCasesInExplosion(row, column, BombAOE, Direction.Down))
                 {
@@ -227,7 +227,7 @@ namespace bomberman
         private List<Tile> ExplodeDown(int row, int column, int bombStr)
         {
             List<Tile> BombAOE = new List<Tile>();
-            while (row < _board.GetLength(0) && !_board[row, column].IsBlocksExplosion&& bombStr > 0)
+            while (row < _board.GetLength(0) && !_board[row, column].BlocksExplosion && bombStr > 0)
             {
                 if (HandleSpecialTileCasesInExplosion(row, column, BombAOE, Direction.Up))
                 {
@@ -245,7 +245,7 @@ namespace bomberman
         private List<Tile> ExplodeLeft(int row, int column, int bombStr)
         {
             List<Tile> BombAOE = new List<Tile>();
-            while (column >= 0 && !_board[row, column].IsBlocksExplosion&& bombStr > 0)
+            while (column >= 0 && !_board[row, column].BlocksExplosion && bombStr > 0)
             {
                 if (HandleSpecialTileCasesInExplosion(row, column, BombAOE, Direction.Right))
                 {
@@ -264,7 +264,7 @@ namespace bomberman
         private List<Tile> ExplodeRight(int row, int column, int bombStr)
         {
             List<Tile> BombAOE = new List<Tile>();
-            while (column < _board.GetLength(1) && !_board[row, column].IsBlocksExplosion&& bombStr > 0)
+            while (column < _board.GetLength(1) && !_board[row, column].BlocksExplosion && bombStr > 0)
             {
                 if (HandleSpecialTileCasesInExplosion(row, column, BombAOE, Direction.Left))
                 {
@@ -294,10 +294,10 @@ namespace bomberman
                 _numOfCrates--;
                 switch (_random.Next() % 9)
                 {
-                    case 0:
+                    case 1:
                         tile = new SpeedPowerUp(_board[row, column].Image);
                         break;
-                    case 1:
+                    case 0:
                         tile = new BombCountPowerUp(_board[row, column].Image);
                         break;
                     case 2:
@@ -370,8 +370,8 @@ namespace bomberman
 
         public bool IsNextToCrate(Player player)
         {
-            int curRow = (int)player.Center.Y / 50;
-            int curCol = (int)player.Center.X / 50;
+            int curRow = (int)player.Center.Y / Game.TileSize;
+            int curCol = (int)player.Center.X / Game.TileSize;
             if (curRow - 1 > 0 && _board[curRow - 1, curCol] is Crate)
                 return true;
             if (curRow + 1 < _board.GetLength(0) && _board[curRow + 1, curCol] is Crate)
@@ -386,7 +386,7 @@ namespace bomberman
         private bool IsTileSafeHelper(int row, int col, int distanceFromTile, out bool isTileSafe)
         {
             isTileSafe = true;
-            if (_board[row, col] is Crate || _board[row, col].IsBlocksExplosion)
+            if (_board[row, col] is Crate || _board[row, col].BlocksExplosion)
             {
                 isTileSafe = true;
                 return true;

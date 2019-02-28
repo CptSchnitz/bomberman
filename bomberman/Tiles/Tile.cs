@@ -39,7 +39,7 @@ namespace bomberman
             }
         }
 
-        public virtual bool IsBlocksExplosion
+        public virtual bool BlocksExplosion
         {
             get
             {

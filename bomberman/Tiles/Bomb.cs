@@ -28,13 +28,13 @@ namespace bomberman
             _ownerLeftBombTile = false;
             _owner = bombOwner;
             _game = game;
-            _owner.PlayerMovement += _owner_PlayerMovement;
+            _owner.PlayerMovement += CheckIfOwnerLeftBombTile;
             _game.GameOver += StopBombWhenGameOver;
-            _game.Paused += _game_Paused;
-            _game.UnPaused += _game_UnPaused;
+            _game.Paused += Game_Paused;
+            _game.UnPaused += Game_UnPaused;
             _bombTimer = new DispatcherTimer();
             _bombTimer.Interval = new TimeSpan(0, 0, 0, 0, TickInterval);
-            _bombTimer.Tick += _bombTimer_Tick;
+            _bombTimer.Tick += BombTimer_Tick;
             _bombTimer.Start();
         }
 
@@ -71,12 +71,12 @@ namespace bomberman
             return ReferenceEquals(_owner, player) && !_ownerLeftBombTile;
         }
 
-        private void _owner_PlayerMovement(object sender, EventArgs e)
+        private void CheckIfOwnerLeftBombTile(object sender, EventArgs e)
         {
             if (!_game.Board.IsPlayerInTile(_owner, this))
             {
                 _ownerLeftBombTile = true;
-                _owner.PlayerMovement -= _owner_PlayerMovement;
+                _owner.PlayerMovement -= CheckIfOwnerLeftBombTile;
             }
         }
         private void StopBombWhenGameOver(object sender, GameOverEventArgs e)
@@ -84,17 +84,17 @@ namespace bomberman
             _bombTimer.Stop();
         }
 
-        private void _game_UnPaused(object sender, EventArgs e)
+        private void Game_UnPaused(object sender, EventArgs e)
         {
             _bombTimer.Start();
         }
 
-        private void _game_Paused(object sender, EventArgs e)
+        private void Game_Paused(object sender, EventArgs e)
         {
             _bombTimer.Stop();
         }
 
-        public void _bombTimer_Tick(object sender, object e)
+        public void BombTimer_Tick(object sender, object e)
         {
             switch (_currentTick)
             {
@@ -118,11 +118,11 @@ namespace bomberman
         {
             _bombTimer.Stop();
             _owner.GiveBomb();
+            _owner.PlayerMovement -= CheckIfOwnerLeftBombTile;
             _game.GameOver -= StopBombWhenGameOver;
-            _game.Paused -= _game_Paused;
-            _game.UnPaused -= _game_UnPaused;
+            _game.Paused -= Game_Paused;
+            _game.UnPaused -= Game_UnPaused;
         }
-
 
         protected virtual void OnBombExplosion()
         {

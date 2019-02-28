@@ -30,13 +30,13 @@ namespace bomberman
             _centerPoint = spawnPoint;
             _image = new Image
             {
-                Height = 50,
-                Width = 50,
+                Height = Game.PlayerSize,
+                Width = Game.PlayerSize,
                 HorizontalAlignment = HorizontalAlignment.Stretch,
                 VerticalAlignment = VerticalAlignment.Stretch,
             };
-            Canvas.SetTop(_image, _centerPoint.Y - 25);
-            Canvas.SetLeft(_image, _centerPoint.X - 25);
+            Canvas.SetTop(_image, _centerPoint.Y - Game.PlayerSize / 2);
+            Canvas.SetLeft(_image, _centerPoint.X - Game.PlayerSize / 2);
             canvas.Children.Add(_image);
             _image.Source = new BitmapImage(new Uri($"{imageSource}"));
             _currentBombCount = _currentMaxBombCount;
@@ -74,68 +74,49 @@ namespace bomberman
 
         public virtual void DoAction()
         {
-            switch (_currentMoveDirection)
+            MoveBasedOnDirection();
+        }
+        private void MoveBasedOnDirection()
+        {
+            
+            double step = StepSize;
+            if (_currentMoveDirection == Direction.Null)
+                return;
+            else if (_currentMoveDirection == Direction.Up || _currentMoveDirection == Direction.Left)
+                step = -step;
+            Point newCenter = GetNewCenterPointBasedOnMoveDirection(_currentMoveDirection, _centerPoint);
+            if (_game.Board.IsMovePossible(newCenter, this))
             {
+                _centerPoint = newCenter;
+                if (_currentMoveDirection == Direction.Left || _currentMoveDirection == Direction.Right)
+                    Canvas.SetLeft(_image, Canvas.GetLeft(_image) + step);
+                else
+                    Canvas.SetTop(_image, Canvas.GetTop(_image) + step);
+                UpgradeMoveSpeedIfNeeded();
+                OnPlayerMovement();
+            }
+        }
+
+        protected Point GetNewCenterPointBasedOnMoveDirection(Direction direction, Point centerPoint)
+        {
+            Point newCenter = new Point();
+            switch (direction)
+            {                
                 case Direction.Up:
-                    MoveUp();
+                    newCenter = new Point(centerPoint.X, centerPoint.Y - StepSize);
                     break;
                 case Direction.Down:
-                    MoveDown();
+                    newCenter = new Point(centerPoint.X, centerPoint.Y + StepSize);
                     break;
                 case Direction.Left:
-                    MoveLeft();
+                    newCenter = new Point(centerPoint.X - StepSize, centerPoint.Y);
                     break;
                 case Direction.Right:
-                    MoveRight();
+                    newCenter = new Point(centerPoint.X + StepSize, centerPoint.Y);
                     break;
             }
+            return newCenter;
         }
-
-        private void MoveLeft()
-        {
-            Point newCenter = new Point(_centerPoint.X - StepSize, _centerPoint.Y);
-            if (_game.Board.IsMovePossible(newCenter, this))
-            {
-                _centerPoint = newCenter;
-                Canvas.SetLeft(_image, Canvas.GetLeft(_image) - StepSize);
-                UpgradeMoveSpeedIfNeeded();
-                OnPlayerMovement();
-            }
-        }
-        private void MoveUp()
-        {
-            Point newCenter = new Point(_centerPoint.X, _centerPoint.Y - StepSize);
-            if (_game.Board.IsMovePossible(newCenter, this))
-            {
-                _centerPoint = newCenter;
-                Canvas.SetTop(_image, Canvas.GetTop(_image) - StepSize);
-                UpgradeMoveSpeedIfNeeded();
-                OnPlayerMovement();
-            }
-        }
-        private void MoveRight()
-        {
-            Point newCenter = new Point(_centerPoint.X + StepSize, _centerPoint.Y);
-            if (_game.Board.IsMovePossible(newCenter, this))
-            {
-                _centerPoint = newCenter;
-                Canvas.SetLeft(_image, Canvas.GetLeft(_image) + StepSize);
-                UpgradeMoveSpeedIfNeeded();
-                OnPlayerMovement();
-            }
-        }
-        private void MoveDown()
-        {
-            Point newCenter = new Point(_centerPoint.X, _centerPoint.Y + StepSize);
-            if (_game.Board.IsMovePossible(newCenter, this))
-            {
-                _centerPoint = newCenter;
-                Canvas.SetTop(_image, Canvas.GetTop(_image) + StepSize);
-                UpgradeMoveSpeedIfNeeded();
-                OnPlayerMovement();
-            }
-        }
-
         public bool DropBomb()
         {
             if (_currentBombCount > 0 && _game.Board.PlaceBomb(this, BombStr, _game))
