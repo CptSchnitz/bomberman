@@ -12,8 +12,7 @@ namespace bomberman
     class Board
     {
         private Tile[,] _board;
-        Random _random;
-        public Point MaxCoordinates { get; }
+        private Random _random;       
         private int _numOfCrates;
         private int _numOfRows = 15;
         private int _numOfColumns = 17;
@@ -73,7 +72,7 @@ namespace bomberman
                 return locations;
             }
         }
-
+        public Point MaxCoordinates { get; }
         public int NumOfCrates
         {
             get

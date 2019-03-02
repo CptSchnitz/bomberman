@@ -7,8 +7,19 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    <Page.Resources>
+        <Style TargetType="TextBlock">
+            <Setter Property="Margin" Value="5"/>
+            <Setter Property="TextWrapping" Value="WrapWholeWords"/>
+        </Style>
+    </Page.Resources>
 
     <Grid>
-        <TextBlock Text="HELP"/>
+        <StackPanel HorizontalAlignment="Left" Width="500">
+            <TextBlock Text="The objective of the game is to eliminate all the enemy players, and be the last player standing."/>
+            <TextBlock Text="To kill Players, strategically place bombs so they trap other players."/>
+            <TextBlock Text="When a crate is destroyed, theres a chance for an upgrade to appear in its place. Those upgrades increase the strength of your bombs, the amount of bombs you can carry, and your move speed."/>
+            <TextBlock Text="Good Luck!"/>
+        </StackPanel>
     </Grid>
 </Page>

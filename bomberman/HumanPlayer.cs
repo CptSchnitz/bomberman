@@ -10,9 +10,9 @@ namespace bomberman
 {
     class HumanPlayer : Player
     {
-        ControlScheme _controlScheme;       
-        bool _resetDirectionFlag = false;
-        bool _firstMove = false;
+        private ControlScheme _controlScheme;       
+        private bool _resetDirectionFlag = false;
+        private bool _firstMove = false;
 
         public HumanPlayer(Point spawnPoint, ControlScheme controlScheme, string iconPath, Canvas canvas, Game game) : base(spawnPoint, canvas, iconPath, game)
         {

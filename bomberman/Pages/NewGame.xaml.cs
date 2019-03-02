@@ -1,20 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
-using Windows.Storage;
-using Windows.UI.Xaml;
+﻿using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
-using Windows.UI.Xaml.Data;
-using Windows.UI.Xaml.Input;
-using Windows.UI.Xaml.Media;
-using Windows.UI.Xaml.Media.Imaging;
-using Windows.UI.Xaml.Navigation;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=234238
 
@@ -60,13 +46,13 @@ namespace bomberman
             btnStartGame.IsEnabled = CheckToEnableStartGameButton();
         }
 
-        private void CheckForSameSelections(Selector selectedControl, Selector[] controlsWithSelection)
+        private void CheckForSameSelections(Selector selectedControl, Selector[] selectorArr)
         {
             int senderSelectedIndex = selectedControl.SelectedIndex;
-            for (int i = 0; i < controlsWithSelection.Length; i++)
+            for (int i = 0; i < selectorArr.Length; i++)
             {
-                if (!ReferenceEquals(selectedControl, controlsWithSelection[i]) && (controlsWithSelection[i].SelectedIndex == senderSelectedIndex))
-                    controlsWithSelection[i].SelectedIndex = -1;
+                if (!ReferenceEquals(selectedControl, selectorArr[i]) && (selectorArr[i].SelectedIndex == senderSelectedIndex))
+                    selectorArr[i].SelectedIndex = -1;
             }
         }
 
@@ -102,7 +88,7 @@ namespace bomberman
         }
 
         private void BtnStartGame_Click(object sender, RoutedEventArgs e)
-        {
+        {            
             (ControlScheme controlScheme, string iconPath)[] playerList = 
                 new (ControlScheme controlScheme, string iconPath)[comboBoxNumOfPlayers.SelectedIndex+1];
 
@@ -120,12 +106,11 @@ namespace bomberman
                     case 2:
                         scheme = ControlScheme.Gamepad;
                         break;
-
                 }
                 playerList[i] = (scheme, _gridViews[i].SelectedValue.ToString());
             }
             ((ControlScheme controlScheme, string iconPath)[] playerList, bool botsEnabled) parameters = (playerList, switchBots.IsOn);
-
+            btnStartGame.IsEnabled = false;
             NavigationView navView = Frame.Parent as NavigationView;
             Page page = navView.Parent as MainPage;
             Frame frame = page.Parent as Frame;
@@ -143,6 +128,7 @@ namespace bomberman
                 else
                 {
                     item.IsEnabled = false;
+                    if (comboBoxNumOfPlayers.SelectedIndex == 0)
                     comboBoxNumOfPlayers.SelectedIndex = 1;
                 }
             }

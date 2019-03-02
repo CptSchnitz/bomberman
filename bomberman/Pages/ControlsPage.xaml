@@ -82,6 +82,10 @@
             <Image Source="../Assets/KeyIcons/Keyboard_Black_P.png"/>
             <TextBlock Text="- Pause the game"/>
         </StackPanel>
-    </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <Image Source="../Assets/KeyIcons/Keyboard_Black_Esc.png"/>
+                <TextBlock Text="- End the game"/>
+            </StackPanel>
+        </StackPanel>
     </ScrollViewer>
 </Page>

@@ -11,10 +11,10 @@ namespace bomberman
 {
     class Explosion
     {
-        Canvas _canvas;
-        Image[] _explosions;
-        int _explosionTimeMiliSec = 500;
-        DispatcherTimer _timer;
+        private Canvas _canvas;
+        private Image[] _explosions;
+        private int _explosionTimeMiliSec = 500;
+        private DispatcherTimer _timer;
 
         public Explosion(List<Tile> explodedTiles, Canvas canvas)
         {

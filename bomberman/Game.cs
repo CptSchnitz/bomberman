@@ -16,7 +16,7 @@ namespace bomberman
     {
         private Canvas _canvas;
         private Board _board;
-        Player[] _players;
+        private Player[] _players;
         private DispatcherTimer _gameTimer;
         private static int _tickInterval = 150;
         private bool _paused;
@@ -77,13 +77,20 @@ namespace bomberman
             "ms-appx:///Assets/PlayerIcons/Obese.png", "ms-appx:///Assets/PlayerIcons/Ree.png", "ms-appx:///Assets/PlayerIcons/thump.png" };
         public static int PlayerSize { get; } = 50;
         public static int TileSize { get; } = 50;
+
+        public void StartGame()
+        {
+            _gameTimer.Start();
+        }
         private void GameTimer_Tick(object sender, object e)
         {
             if (IsGameOver(out int winner))
             {
                 _gameTimer.Stop();
-                GameOverEventArgs args = new GameOverEventArgs();
-                args.Winner = winner;
+                GameOverEventArgs args = new GameOverEventArgs
+                {
+                    Winner = winner
+                };
                 OnGameOver(args);
             }
             else
@@ -95,7 +102,77 @@ namespace bomberman
                 }
             }
         }
+        public void OnKeyDown(CoreWindow sender, KeyEventArgs args)
+        {
+            if (args.KeyStatus.RepeatCount == 1)
+            {
+                Windows.System.VirtualKey key = args.VirtualKey;
+                if (!_paused)
+                {
+                    foreach (Player player in _players)
+                    {
+                        if (player is HumanPlayer humanPlayer && humanPlayer.Alive && humanPlayer.ControlScheme.IsKeyInScheme(key))
+                            humanPlayer.OnKeyDown(key);
+                    }
 
+                }
+            }
+        }
+        public void OnKeyUp(CoreWindow sender, KeyEventArgs args)
+        {
+            VirtualKey key = args.VirtualKey;
+            if (_paused && key == VirtualKey.P)
+            {
+                _gameTimer.Start();
+                OnUnPaused();
+                _paused = false;
+                return;
+            }
+            else if (key == VirtualKey.Escape)
+            {
+                _gameTimer.Stop();
+                GameOverEventArgs gameOverArgs = new GameOverEventArgs
+                {
+                    Winner = -1
+                };
+                OnGameOver(gameOverArgs);
+                return;
+            }
+            else
+            {
+                if (key == VirtualKey.P)
+                {
+                    _gameTimer.Stop();
+                    OnPaused();
+                    _paused = true;
+                    return;
+                }
+                foreach (Player player in _players)
+                {
+                    if (player is HumanPlayer humanPlayer && humanPlayer.Alive && humanPlayer.ControlScheme.IsKeyInScheme(key))
+                        humanPlayer.OnKeyUp(key);
+                }
+            }
+
+        }
+        public void OnBombExplosion(object sender, EventArgs e)
+        {
+            Bomb bomb = sender as Bomb;
+            List<Tile> explodedTiles = _board.ExplodeBomb(bomb);
+            new Explosion(explodedTiles, _canvas);
+            CheckForPlayersHitByBomb(explodedTiles);
+        }
+        private void CheckForPlayersHitByBomb(List<Tile> explodedTiles)
+        {
+            foreach (Tile tile in explodedTiles)
+            {
+                foreach (Player player in Players)
+                {
+                    if (_board.IsPlayerInTile(player, tile))
+                        player.Hit();
+                }
+            }
+        }
         private bool IsGameOver(out int winner)
         {
             int playersAlive = 0;
@@ -120,81 +197,6 @@ namespace bomberman
                 return true;
             return false;
         }
-
-        public void StartGame()
-        {
-            _gameTimer.Start();
-        }
-
-        public void OnBombExplosion(object sender, EventArgs e)
-        {
-            Bomb bomb = sender as Bomb;
-            List<Tile> explodedTiles = _board.ExplodeBomb(bomb);
-            new Explosion(explodedTiles, _canvas);
-            CheckForPlayersHitByBomb(explodedTiles);
-        }
-
-        private void CheckForPlayersHitByBomb(List<Tile> explodedTiles)
-        {
-            foreach (Tile tile in explodedTiles)
-            {
-                foreach (Player player in Players)
-                {
-                    if (_board.IsPlayerInTile(player, tile))
-                        player.Hit();
-                }
-            }
-        }
-
-        public void OnKeyDown(CoreWindow sender, KeyEventArgs args)
-        {
-            if (args.KeyStatus.RepeatCount == 1)
-            {
-                Windows.System.VirtualKey key = args.VirtualKey;
-                if (!_paused)
-                {
-                    foreach (Player player in _players)
-                    {
-                        if (player is HumanPlayer humanPlayer && humanPlayer.Alive && humanPlayer.ControlScheme.IsKeyInScheme(key))
-                            humanPlayer.OnKeyDown(key);
-                    }
-
-                }
-            }
-        }
-
-        public void OnKeyUp(CoreWindow sender, KeyEventArgs args)
-        {
-            VirtualKey key = args.VirtualKey;
-            if (_paused && key == VirtualKey.P)
-            {
-                _gameTimer.Start();
-                OnUnPaused();
-                _paused = false;
-                return;
-            }
-            else
-            {
-                if (key == VirtualKey.P)
-                {
-                    _gameTimer.Stop();
-                    OnPaused();
-                    _paused = true;
-                    return;
-                }
-                foreach (Player player in _players)
-                {
-                    if (player is HumanPlayer humanPlayer && humanPlayer.Alive && humanPlayer.ControlScheme.IsKeyInScheme(key))
-                        humanPlayer.OnKeyUp(key);
-                }
-            }
-
-        }
-        protected virtual void OnGameOver(GameOverEventArgs e)
-        {
-            if (GameOver != null)
-                GameOver(this, e);
-        }
         protected virtual void OnPaused()
         {
             if (Paused != null)
@@ -205,7 +207,11 @@ namespace bomberman
             if (UnPaused != null)
                 UnPaused(this, EventArgs.Empty);
         }
-
+        protected virtual void OnGameOver(GameOverEventArgs e)
+        {
+            if (GameOver != null)
+                GameOver(this, e);
+        }
         public event EventHandler<GameOverEventArgs> GameOver;
         public event EventHandler Paused;
         public event EventHandler UnPaused;
