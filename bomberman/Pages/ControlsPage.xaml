@@ -62,28 +62,28 @@
             <Viewbox Grid.Row="5">
                 <TextBlock   Text="Place Bomb"/>
             </Viewbox>
-            <Image Grid.Row="1" Grid.Column="1" Source="../Assets/KeyIcons/Keyboard_Black_W.png"/>
-            <Image Grid.Row="2" Grid.Column="1" Source="../Assets/KeyIcons/Keyboard_Black_S.png"/>
-            <Image Grid.Row="3" Grid.Column="1" Source="../Assets/KeyIcons/Keyboard_Black_A.png"/>
-            <Image Grid.Row="4" Grid.Column="1" Source="../Assets/KeyIcons/Keyboard_Black_D.png"/>
-            <Image Grid.Row="5" Grid.Column="1" Source="../Assets/KeyIcons/Keyboard_Black_Space.png"/>
-            <Image Grid.Row="1" Grid.Column="2" Source="../Assets/KeyIcons/Keyboard_Black_Arrow_Up.png"/>
-            <Image Grid.Row="2" Grid.Column="2" Source="../Assets/KeyIcons/Keyboard_Black_Arrow_Down.png"/>
-            <Image Grid.Row="3" Grid.Column="2" Source="../Assets/KeyIcons/Keyboard_Black_Arrow_Left.png"/>
-            <Image Grid.Row="4" Grid.Column="2" Source="../Assets/KeyIcons/Keyboard_Black_Arrow_Right.png"/>
-            <Image Grid.Row="5" Grid.Column="2" Source="../Assets/KeyIcons/Keyboard_Black_Enter.png"/>
-            <Image Grid.Row="1" Grid.Column="3" Source="../Assets/KeyIcons/XboxOne_Dpad_Up.png"/>
-            <Image Grid.Row="2" Grid.Column="3" Source="../Assets/KeyIcons/XboxOne_Dpad_Down.png"/>
-            <Image Grid.Row="3" Grid.Column="3" Source="../Assets/KeyIcons/XboxOne_Dpad_Left.png"/>
-            <Image Grid.Row="4" Grid.Column="3" Source="../Assets/KeyIcons/XboxOne_Dpad_Right.png"/>
-            <Image Grid.Row="5" Grid.Column="3" Source="../Assets/KeyIcons/XboxOne_A.png"/>
+            <Image Grid.Row="1" Grid.Column="1" Source="/Assets/KeyIcons/Keyboard_Black_W.png"/>
+            <Image Grid.Row="2" Grid.Column="1" Source="/Assets/KeyIcons/Keyboard_Black_S.png"/>
+            <Image Grid.Row="3" Grid.Column="1" Source="/Assets/KeyIcons/Keyboard_Black_A.png"/>
+            <Image Grid.Row="4" Grid.Column="1" Source="/Assets/KeyIcons/Keyboard_Black_D.png"/>
+            <Image Grid.Row="5" Grid.Column="1" Source="/Assets/KeyIcons/Keyboard_Black_Space.png"/>
+            <Image Grid.Row="1" Grid.Column="2" Source="/Assets/KeyIcons/Keyboard_Black_Arrow_Up.png"/>
+            <Image Grid.Row="2" Grid.Column="2" Source="/Assets/KeyIcons/Keyboard_Black_Arrow_Down.png"/>
+            <Image Grid.Row="3" Grid.Column="2" Source="/Assets/KeyIcons/Keyboard_Black_Arrow_Left.png"/>
+            <Image Grid.Row="4" Grid.Column="2" Source="/Assets/KeyIcons/Keyboard_Black_Arrow_Right.png"/>
+            <Image Grid.Row="5" Grid.Column="2" Source="/Assets/KeyIcons/Keyboard_Black_Enter.png"/>
+            <Image Grid.Row="1" Grid.Column="3" Source="/Assets/KeyIcons/XboxOne_Dpad_Up.png"/>
+            <Image Grid.Row="2" Grid.Column="3" Source="/Assets/KeyIcons/XboxOne_Dpad_Down.png"/>
+            <Image Grid.Row="3" Grid.Column="3" Source="/Assets/KeyIcons/XboxOne_Dpad_Left.png"/>
+            <Image Grid.Row="4" Grid.Column="3" Source="/Assets/KeyIcons/XboxOne_Dpad_Right.png"/>
+            <Image Grid.Row="5" Grid.Column="3" Source="/Assets/KeyIcons/XboxOne_A.png"/>
         </Grid>
         <StackPanel Orientation="Horizontal">
-            <Image Source="../Assets/KeyIcons/Keyboard_Black_P.png"/>
+            <Image Source="/Assets/KeyIcons/Keyboard_Black_P.png"/>
             <TextBlock Text="- Pause the game"/>
         </StackPanel>
             <StackPanel Orientation="Horizontal">
-                <Image Source="../Assets/KeyIcons/Keyboard_Black_Esc.png"/>
+                <Image Source="/Assets/KeyIcons/Keyboard_Black_Esc.png"/>
                 <TextBlock Text="- End the game"/>
             </StackPanel>
         </StackPanel>
